@@ -30,4 +30,13 @@ Observations:
 
 '''
 
+#Region Imports
 import numpy as np
+import matplotlib.pyplot as plt
+#
+from sklearn.linear_model import LogisticRegression
+from sklearn.neighbors.kde import KernelDensity #reminder: Needs to find the optimum value for the bandwitdh parameter of the kernel density estimators
+from sklearn.naive_bayes import GaussianNB #reminder: no parameter adjustment
+#
+from sklearn.model_selection import train_test_split, KFold, StratifiedKFold
+#End of Region Imports
