@@ -30,13 +30,53 @@ Observations:
 
 '''
 
-#Region Imports
+##Region Imports
+#
 import numpy as np
 import matplotlib.pyplot as plt
 #
 from sklearn.linear_model import LogisticRegression
-from sklearn.neighbors.kde import KernelDensity #reminder: Needs to find the optimum value for the bandwitdh parameter of the kernel density estimators
+from sklearn.neighbors import KernelDensity #reminder: Needs to find the optimum value for the bandwitdh parameter of the kernel density estimators
 from sklearn.naive_bayes import GaussianNB #reminder: no parameter adjustment
 #
 from sklearn.model_selection import train_test_split, KFold, StratifiedKFold
-#End of Region Imports
+##End of Region Imports
+
+#File Loading
+def load_file(file):
+    matrix = np.loadtxt(file,delimiter='\t')
+    return matrix
+
+def calc_fold(feats, X,Y, train_ix,valid_ix,C=1e12):
+    """return error for train and validation sets"""
+    reg = LogisticRegression(C=C, tol=1e-10)
+    reg.fit(X[train_ix,:feats],Y[train_ix])
+    prob = reg.predict_proba(X[:,:feats])[:,1]
+    squares = (prob-Y)**2
+    return np.mean(squares[train_ix]),np.mean(squares[valid_ix])
+
+
+#File Loading
+def load_file(file):
+    matrix = np.loadtxt(file,delimiter='\t')
+    return matrix
+tests = load_file("TP1_test.tsv")
+train = load_file("TP1_train.tsv")
+
+#Shuffle
+np.random.shuffle(tests)
+np.random.shuffle(train)
+
+print("tests [V S C E Class]")
+print(tests)
+print("train [V S C E Class]")
+print(train)
+
+
+
+
+
+
+
+
+
