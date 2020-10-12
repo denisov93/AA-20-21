@@ -32,6 +32,7 @@ Observations:
 
 ##Region Imports
 #
+import time
 import numpy as np
 import matplotlib.pyplot as plt
 #
@@ -39,8 +40,27 @@ from sklearn.linear_model import LogisticRegression
 from sklearn.neighbors import KernelDensity #reminder: Needs to find the optimum value for the bandwitdh parameter of the kernel density estimators
 from sklearn.naive_bayes import GaussianNB #reminder: no parameter adjustment
 #
+from sklearn.utils import shuffle
 from sklearn.model_selection import train_test_split, KFold, StratifiedKFold
 ##End of Region Imports
+
+#Debug
+time_ms = lambda: int(round(time.time() * 1000))
+start = time_ms()
+
+def sep(text):
+    print("~~~~~~~ "+text+" ~~~~~~~~~~~~~~~~~")
+def sepn(text):
+    print("~~~~~~~ "+text+" ~~~~~~~~~~~~~~~~~\n")
+
+def showLoadShuffleDebug():
+    sep("Tests [V S C E Class]")
+    print(tests)
+    sep("Train [V S C E Class]")
+    print(train)
+    sepn("Loading & Shuffle: Complete")
+
+#
 
 #File Loading
 def load_file(file):
@@ -55,7 +75,6 @@ def calc_fold(feats, X,Y, train_ix,valid_ix,C=1e12):
     squares = (prob-Y)**2
     return np.mean(squares[train_ix]),np.mean(squares[valid_ix])
 
-
 #File Loading
 def load_file(file):
     matrix = np.loadtxt(file,delimiter='\t')
@@ -64,18 +83,31 @@ tests = load_file("TP1_test.tsv")
 train = load_file("TP1_train.tsv")
 
 #Shuffle
-np.random.shuffle(tests)
-np.random.shuffle(train)
+tests = shuffle(tests)
+train = shuffle(train)
 
-print("tests [V S C E Class]")
-print(tests)
-print("train [V S C E Class]")
-print(train)
+showLoadShuffleDebug()
+
+#Standardizing
+sep("Standardizing")
+Ys = train
+Xs = tests
+means = np.mean(Xs,axis=0)
+stdevs = np.std(Xs,axis=0)
+Xs = (Xs-means)/stdevs
+
+print(Ys)
+print(Xs)
+sep("Standardizing: Complete")
 
 
 
 
 
+#Process Finish
+end = time_ms()
+runtime = end - start
+print("Runtime: "+str(runtime)+"ms")
 
 
 
