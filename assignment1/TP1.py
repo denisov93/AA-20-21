@@ -35,7 +35,8 @@ Observations:
 import time
 import numpy as np
 import matplotlib.pyplot as plt
-from TP1_aux import poly_mat, poly_16features
+from TP1_aux import poly_mat
+from TP1_aux import poly_16features
 from TP1_aux import create_plot
 #
 from sklearn.linear_model import LogisticRegression
@@ -108,13 +109,13 @@ print(Ys)
 print(Xs)
 print(Y_t)
 print(X_t)
-sep("Standardizing: Complete")
+sepn("Standardizing: Complete")
 
 #features and stratifed sampling
 X_r,X_t,Y_r,Y_t = train_test_split(Xs, Ys, test_size=0.33, stratify = Ys)
 
-feats = PolynomialFeatures(2, interaction_only=False, include_bias=False)
-#feats = poly_16features(Xs)
+#feats = PolynomialFeatures(2, interaction_only=False, include_bias=False)
+feats = poly_16features(Xs)
 Xs = feats.fit_transform(Xs)
 X_t = feats.fit_transform(X_t)
 
@@ -126,7 +127,7 @@ stratKf = StratifiedKFold( n_splits = folds)
 
 errorTrain = []
 errorValidation = []
-best_feats = 2
+best_feats = -1
 best_re = 1e12 
 
 ax_lims=(-3,3,-3,3)
@@ -145,12 +146,14 @@ for feats in range(2,16):
     re = va_err/folds - tr_err/folds
     if(re < best_re):
         best_feats = feats
-        best_re = re        
-    create_plot(Xs, Ys, X_t, Y_t, feats, re)
-    
-#plt.savefig('final_plot.png', dpi=300)
-plt.close()
+        best_re = re
+        print("New best feature: "+str(best_feats))
+    create_plot(plt, Xs, Ys, X_t, Y_t, feats, re)
 
+sep("End of best features ploting")
+
+plt.savefig('final_plot.png', dpi=300)
+plt.close()
 
 
 #Process Finish
