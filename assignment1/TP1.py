@@ -113,7 +113,7 @@ print(X_t)
 sepn("Standardizing: Complete")
 
 #features and stratifed sampling
-X_r,X_t,Y_r,Y_t = train_test_split(Xs, Ys, test_size=0.33, stratify = Ys)
+#X_r,X_t,Y_r,Y_t = train_test_split(Xs, Ys, test_size=0.33, stratify = Ys)
 
 #feats = PolynomialFeatures(2, interaction_only=False, include_bias=False)
 #Xs = feats.fit_transform(Xs)
