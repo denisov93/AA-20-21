@@ -9,7 +9,7 @@ from sklearn.linear_model import LogisticRegression
 def poly_16features(X):
     """Expand data polynomially"""
     X_exp = np.zeros((X.shape[0],X.shape[1]+14))
-    X_exp[:,:2] = X 
+    #X_exp[:,:2] = X 
     X_exp[:,2] = X[:,0]*X[:,1]
     X_exp[:,3] = X[:,0]**2
     X_exp[:,4] = X[:,1]**2

@@ -12,8 +12,8 @@ TP1 Test & Train File contents
 Features(4) + ClassLabels(1):
 1) Variance 
 2) Skewness 
-3) Curtosis of Wavelet Transformed image
-4) Entropy of the bank note image
+3) Curtosis
+4) Entropy
 5) Class Label [0=RealBankNotes & 1=FakeBankNotes]
 
 Classifiers(3) needed for the project:
@@ -26,8 +26,7 @@ Comparing classifiers:
 > McNemar's test (95% confidence)
 
 Observations:
->
-
+> "Não esqueçam que, no caso do Naive Bayes, kde.fit deve ser feito para cada "par" (Classe, Atributo)."
 '''
 
 ##Region Imports
@@ -35,6 +34,8 @@ Observations:
 import time
 import numpy as np
 import matplotlib.pyplot as plt
+import matplotlib.pyplot as plt2
+import matplotlib.patches as mpatches
 from TP1_aux import poly_mat
 from TP1_aux import poly_16features
 from TP1_aux import create_plot
@@ -115,12 +116,10 @@ sepn("Standardizing: Complete")
 X_r,X_t,Y_r,Y_t = train_test_split(Xs, Ys, test_size=0.33, stratify = Ys)
 
 #feats = PolynomialFeatures(2, interaction_only=False, include_bias=False)
-feats = poly_16features(Xs)
-Xs = feats.fit_transform(Xs)
-X_t = feats.fit_transform(X_t)
+#Xs = feats.fit_transform(Xs)
+#X_t = feats.fit_transform(X_t)
 
-print(feats)
-sep("Best Features")
+sep("StratifiedKFold")
 
 folds = 5
 stratKf = StratifiedKFold( n_splits = folds)
@@ -148,12 +147,24 @@ for feats in range(2,16):
         best_feats = feats
         best_re = re
         print("New best feature: "+str(best_feats))
-    create_plot(plt, Xs, Ys, X_t, Y_t, feats, re)
+    #create_plot(plt, Xs, Ys, X_t, Y_t, feats, re)
 
 sep("End of best features ploting")
 
-plt.savefig('final_plot.png', dpi=300)
+#plt.savefig('final_plot.png', dpi=300)
 plt.close()
+
+plt2.figure(figsize=(8,8), frameon=False)
+plt2.subplot(211)
+
+line1, = plt2.plot(errorTrain, label="Train Error", linestyle='--')
+line2, = plt2.plot(errorValidation, label="validation Error", linestyle='--')
+
+legend = plt2.legend(handles=[line1,line2], loc='upper right')
+
+ax = plt2.gca().add_artist(legend)
+plt2.savefig('error_validation_plot.png', dpi=300)
+plt2.show()
 
 
 #Process Finish
