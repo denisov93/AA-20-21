@@ -34,10 +34,8 @@ Observations:
 import time
 import numpy as np
 import matplotlib.pyplot as plt
-import matplotlib.pyplot as plt2
 import matplotlib.patches as mpatches
 from TP1_aux import poly_mat
-from TP1_aux import poly_16features
 from TP1_aux import create_plot
 #
 from sklearn.linear_model import LogisticRegression
@@ -71,13 +69,22 @@ def showLoadShuffleDebug():
 #
 
 #Other
+'''
 def calc_fold(feats, X,Y, train_ix,valid_ix,C=1e12):
     """return error for train and validation sets"""
     reg = LogisticRegression(C=C, tol=1e-10)
     reg.fit(X[train_ix,:feats],Y[train_ix])
     prob = reg.predict_proba(X[:,:feats])[:,1]
     squares = (prob-Y)**2
-    return np.mean(squares[train_ix]),np.mean(squares[valid_ix])
+    return np.mean(squares[train_ix]),np.mean(squares[valid_ix])'''
+
+def calc_fold(X,Y, train_ix,valid_ix,C):
+    """return error for train and validation sets    """
+    reg = LogisticRegression(C=C, tol=1e-10)
+    reg.fit(X[train_ix],Y[train_ix])
+    erroVal = 1 - reg.score(X[valid_ix],Y[valid_ix])
+    erroTreino =  1 - reg.score(X[train_ix],Y[train_ix])
+    return (erroTreino, erroVal)
 
 #File Loading
 def load_file(file):
@@ -100,24 +107,20 @@ means = np.mean(Xs,axis=0)
 stdevs = np.std(Xs,axis=0)
 Xs = (Xs-means)/stdevs
 #Tests
-Y_t = tests[:,4].astype(int)
-X_t = tests[:,0:4]
-means = np.mean(X_t,axis=0)
-stdevs = np.std(X_t,axis=0)
-X_t = (X_t-means)/stdevs
+Y_finaltest = tests[:,4].astype(int)
+X_finaltest = tests[:,0:4]
+finaltest_means = np.mean(X_finaltest,axis=0)
+finaltest_stdevs = np.std(X_finaltest,axis=0)
+X_finaltest = (X_finaltest-finaltest_means)/finaltest_stdevs
 
+print("Preparing training set")
 print(Ys)
 print(Xs)
-print(Y_t)
-print(X_t)
+print("Preparing set for final test")
+print(Y_finaltest)
+print(X_finaltest)
 sepn("Standardizing: Complete")
 
-#features and stratifed sampling
-#X_r,X_t,Y_r,Y_t = train_test_split(Xs, Ys, test_size=0.33, stratify = Ys)
-
-#feats = PolynomialFeatures(2, interaction_only=False, include_bias=False)
-#Xs = feats.fit_transform(Xs)
-#X_t = feats.fit_transform(X_t)
 
 sep("StratifiedKFold")
 
@@ -127,16 +130,13 @@ stratKf = StratifiedKFold( n_splits = folds)
 errorTrain = []
 errorValidation = []
 best_feats = -1
-best_re = 1e12 
+best_re = 1e12
+C = 5
 
-ax_lims=(-3,3,-3,3)
-plt.figure(figsize=(8,8), frameon=False)
-plt.axis(ax_lims)
-
-for feats in range(2,16):
+for feats in range(1,6):
     tr_err = va_err = 0
     for tr_ix, val_ix in stratKf.split(Ys, Ys):
-        r, v = calc_fold(feats, Xs,  Ys, tr_ix, val_ix)
+        r, v = calc_fold(Xs, Ys, tr_ix, val_ix, C)
         tr_err += r
         va_err += v
     errorTrain.append(tr_err/folds)
@@ -147,25 +147,24 @@ for feats in range(2,16):
         best_feats = feats
         best_re = re
         print("New best feature: "+str(best_feats))
-    #create_plot(plt, Xs, Ys, X_t, Y_t, feats, re)
 
+print("Best C: "+str(best_re))
 sep("End of best features ploting")
 
-#plt.savefig('final_plot.png', dpi=300)
+plt.figure(figsize=(8,8), frameon=True)
+ax_lims=(-3,3,-3,3)
+plt.axis(ax_lims)
+plt.subplot(211)
+
+line1, = plt.plot(errorTrain, label="Train Err", linestyle='--', color='blue')
+line2, = plt.plot(errorValidation, label="Validation Err", linestyle='--', color='green')
+
+legend = plt.legend(handles=[line1,line2], loc='upper right')
+
+ax = plt.gca().add_artist(legend)
+plt.savefig('error_validation_plot.png', dpi=300)
+plt.show()
 plt.close()
-
-plt2.figure(figsize=(8,8), frameon=False)
-plt2.subplot(211)
-
-line1, = plt2.plot(errorTrain, label="Train Error", linestyle='--')
-line2, = plt2.plot(errorValidation, label="validation Error", linestyle='--')
-
-legend = plt2.legend(handles=[line1,line2], loc='upper right')
-
-ax = plt2.gca().add_artist(legend)
-plt2.savefig('error_validation_plot.png', dpi=300)
-plt2.show()
-
 
 #Process Finish
 end = time_ms()
