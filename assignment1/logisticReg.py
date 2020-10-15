@@ -11,13 +11,16 @@ import matplotlib.pyplot as plt
 from sklearn.model_selection import StratifiedKFold
 from sklearn.linear_model import LogisticRegression
 
-def calc_fold(feats, X,Y, train_ix,valid_ix,C=1e12):
-    """return error for train and validation sets"""
+def calc_fold(X,Y, train_ix,valid_ix,C):
+    """return error for train and validation sets
+        
+    """
+
     reg = LogisticRegression(C=C, tol=1e-10)
-    reg.fit(X[train_ix,:feats],Y[train_ix])
-    prob = reg.predict_proba(X[:,:feats])[:,1]
-    squares = (prob-Y)**2
-    return np.mean(squares[train_ix]),np.mean(squares[valid_ix])
+    reg.fit(X[train_ix],Y[train_ix])
+    erroVal = 1 - reg.score(X[valid_ix],Y[valid_ix])
+    erroTreino =  1 - reg.score(X[train_ix],Y[train_ix])
+    return (erroTreino,erroVal)
 
 mat = np.loadtxt("TP1_train.tsv",delimiter='\t')
 data = shuffle(mat)
@@ -43,23 +46,23 @@ stratKf = StratifiedKFold( n_splits = folds)
 
 errorTrain = []
 errorValidation = []
-
+c = 1e5
 
 for feats in range(2,6):
     tr_err = va_err = 0
     for tr_ix, val_ix in stratKf.split(Ys, Ys):
-        r, v = calc_fold(feats, Xs,  Ys, tr_ix, val_ix)
+        r, v = calc_fold(feats, Xs,  Ys, tr_ix, val_ix,c)
         tr_err += r
         va_err += v
     errorTrain.append(tr_err/folds)
     errorValidation.append(va_err/folds)
     print(feats, ':', tr_err/folds, va_err/folds)
-        
+print("accuracy:",(sum(errorTrain)+sum(errorValidation))/3)        
     
 line1, = plt.plot(errorTrain, label="errorTrain", linestyle='--')
 line2, = plt.plot(errorValidation, label="errorValidation", linestyle='--',color="red")
 plt.legend(bbox_to_anchor=(0., 1.02, 1., .102), loc='lower left', ncol=2, mode="expand", borderaxespad=0.)
 #plt.show() 
     
-plt.savefig('final_plot.png', dpi=300)
-plt.close()
+#plt.savefig('final_plot.png', dpi=300)
+#plt.close()
