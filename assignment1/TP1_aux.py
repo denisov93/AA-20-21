@@ -6,7 +6,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from sklearn.linear_model import LogisticRegression
 
-'''
+
 def poly_16features(X):
     """Expand data polynomially"""
     X_exp = np.zeros((X.shape[0],X.shape[1]+14))
@@ -26,7 +26,7 @@ def poly_16features(X):
     X_exp[:,14] = X[:,0]**5
     X_exp[:,15] = X[:,1]**5
     return X_exp
-'''
+
 
 def poly_mat(reg,X_data,feats,ax_lims):
     """create score matrix for contour"""

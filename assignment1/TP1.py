@@ -113,9 +113,10 @@ finaltest_means = np.mean(X_finaltest,axis=0)
 finaltest_stdevs = np.std(X_finaltest,axis=0)
 X_finaltest = (X_finaltest-finaltest_means)/finaltest_stdevs
 
-print("Preparing training set")
-print(Ys)
-print(Xs)
+print("Preparing training set test/validation")
+X_train,X_test,Y_train,Y_test = train_test_split(Xs, Ys, test_size=0.33, stratify = Ys)
+print(X_train)
+print(Y_train)
 print("Preparing set for final test")
 print(Y_finaltest)
 print(X_finaltest)
@@ -123,45 +124,37 @@ sepn("Standardizing: Complete")
 
 sep("StratifiedKFold")
 
-X_r,X_t,Y_r,Y_t = train_test_split(Xs, Ys, test_size=0.33, stratify = Ys)
-
 folds = 5
 stratKf = StratifiedKFold( n_splits = folds)
-
 errorTrain = []
 errorValidation = []
-best_feats = -1
+
 best_re = 1e12
-C = 1
+best_C = 1e12
 
-for feats in range(2,6):
+c_from = 0.001
+c_to = 0.005
+step = 0.00005
+calc = int((c_to - c_from)/step)
+print("Calculating "+str(calc)+" values for C")
+
+for c in np.arange(c_from,c_to,step):
     tr_err = va_err = 0
-    for tr_ix, val_ix in stratKf.split(Ys, Ys):
-        r, v = calc_fold(Xs, Ys, tr_ix, val_ix,C)
+    for tr_ix, val_ix in stratKf.split(Y_train, Y_train):
+        r, v = calc_fold(X_train, Y_train, tr_ix, val_ix, c)
         tr_err += r
         va_err += v
     errorTrain.append(tr_err/folds)
     errorValidation.append(va_err/folds)
-    print(feats, ':', tr_err/folds, va_err/folds)
-print("accuracy:",(sum(errorTrain)+sum(errorValidation))/3)  
-'''
-for feats in range(1,6):
-    tr_err = va_err = 0
-    for tr_ix, val_ix in stratKf.split(Y_r, Y_r):
-        r, v = calc_fold(X_r, Y_r, tr_ix, val_ix, C)
-        tr_err += r
-        va_err += v
-    errorTrain.append(tr_err/folds)
-    errorValidation.append(va_err/folds)
-    print(feats, ':', tr_err/folds, va_err/folds)
-    re = va_err/folds - tr_err/folds
+    print(round(c,7), ':', tr_err/folds, va_err/folds)
+    re = (va_err - tr_err)/folds
     if(re < best_re):
-        best_feats = feats
         best_re = re
-        print("New best feature: "+str(best_feats))'''
+        best_C = round(c,7)
+        print("New best C: "+str(best_C))
 
-print("Best C: "+str(best_re))
-sep("End of best features ploting")
+print("Best C: "+str(best_C))
+sep("End of best C ploting")
 
 plt.figure(figsize=(8,8), frameon=True)
 ax_lims=(-3,3,-3,3)
@@ -182,8 +175,3 @@ plt.close()
 end = time_ms()
 runtime = end - start
 print("Runtime: "+str(runtime)+"ms")
-
-
-
-
-
