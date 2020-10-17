@@ -121,7 +121,6 @@ print(Y_finaltest)
 print(X_finaltest)
 sepn("Standardizing: Complete")
 
-
 sep("StratifiedKFold")
 
 folds = 5
@@ -131,8 +130,19 @@ errorTrain = []
 errorValidation = []
 best_feats = -1
 best_re = 1e12
-C = 5
+C = 1
 
+for feats in range(2,6):
+    tr_err = va_err = 0
+    for tr_ix, val_ix in stratKf.split(Ys, Ys):
+        r, v = calc_fold(Xs, Ys, tr_ix, val_ix,C)
+        tr_err += r
+        va_err += v
+    errorTrain.append(tr_err/folds)
+    errorValidation.append(va_err/folds)
+    print(feats, ':', tr_err/folds, va_err/folds)
+print("accuracy:",(sum(errorTrain)+sum(errorValidation))/3)  
+'''
 for feats in range(1,6):
     tr_err = va_err = 0
     for tr_ix, val_ix in stratKf.split(Ys, Ys):
@@ -146,7 +156,7 @@ for feats in range(1,6):
     if(re < best_re):
         best_feats = feats
         best_re = re
-        print("New best feature: "+str(best_feats))
+        print("New best feature: "+str(best_feats))'''
 
 print("Best C: "+str(best_re))
 sep("End of best features ploting")
