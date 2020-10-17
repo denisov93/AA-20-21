@@ -124,6 +124,8 @@ sepn("Standardizing: Complete")
 
 sep("StratifiedKFold")
 
+X_r,X_t,Y_r,Y_t = train_test_split(Xs, Ys, test_size=0.33, stratify = Ys)
+
 folds = 5
 stratKf = StratifiedKFold( n_splits = folds)
 
@@ -135,8 +137,8 @@ C = 5
 
 for feats in range(1,6):
     tr_err = va_err = 0
-    for tr_ix, val_ix in stratKf.split(Ys, Ys):
-        r, v = calc_fold(Xs, Ys, tr_ix, val_ix, C)
+    for tr_ix, val_ix in stratKf.split(Y_r, Y_r):
+        r, v = calc_fold(X_r, Y_r, tr_ix, val_ix, C)
         tr_err += r
         va_err += v
     errorTrain.append(tr_err/folds)
