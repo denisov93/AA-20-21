@@ -66,6 +66,24 @@ def showLoadShuffleDebug():
     print("Total: "+str(len(train)))
     sepn("Loading & Shuffle: Complete")
 
+def printProgressBar (iteration, total, decimals = 1, printEnd = "\r"):
+    """
+    Call in a loop to create terminal progress bar
+    @params:
+        iteration   - Required  : current iteration (Int)
+        total       - Required  : total iterations (Int)
+        prefix      - Optional  : prefix string (Str)
+        suffix      - Optional  : suffix string (Str)
+        decimals    - Optional  : positive number of decimals in percent complete (Int)
+        length      - Optional  : character length of bar (Int)
+        fill        - Optional  : bar fill character (Str)
+        printEnd    - Optional  : end character (e.g. "\r", "\r\n") (Str)
+    """
+    percent = ("{0:." + str(decimals) + "f}").format(100 * (iteration / float(total)))
+    print(f'\r({percent}%)', end = printEnd)
+    # Print New Line on Complete
+    if iteration == total: 
+        print()
 #
 
 #Other
@@ -132,27 +150,33 @@ errorValidation = []
 best_re = 1e12
 best_C = 1e12
 
-c_from = 0.001
-c_to = 0.005
-step = 0.00005
+c_from = 0.0001
+c_to = 0.01
+step = 0.000025
 calc = int((c_to - c_from)/step)
+counter = 0
 print("Calculating "+str(calc)+" values for C")
 
 for c in np.arange(c_from,c_to,step):
+    counter += 1
     tr_err = va_err = 0
+    printProgressBar(counter,calc)
     for tr_ix, val_ix in stratKf.split(Y_train, Y_train):
         r, v = calc_fold(X_train, Y_train, tr_ix, val_ix, c)
         tr_err += r
         va_err += v
     errorTrain.append(tr_err/folds)
     errorValidation.append(va_err/folds)
-    print(round(c,7), ':', tr_err/folds, va_err/folds)
-    re = (va_err - tr_err)/folds
+    
+    if(va_err > tr_err):
+        re = (va_err - tr_err)
+    else: 
+        re = (tr_err - va_err)
+    
     if(re < best_re):
         best_re = re
         best_C = round(c,7)
-        print("New best C: "+str(best_C))
-
+        
 print("Best C: "+str(best_C))
 sep("End of best C ploting")
 
