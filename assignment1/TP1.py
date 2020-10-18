@@ -195,6 +195,11 @@ plt.savefig('error_validation_plot.png', dpi=300)
 plt.show()
 plt.close()
 
+reg = LogisticRegression(C=1e10, tol=1e-10)
+reg.fit(X_train, Y_train)
+erroVal = 1 - reg.score(X_finaltest,Y_finaltest)
+print(erroVal)
+
 #Process Finish
 end = time_ms()
 runtime = end - start

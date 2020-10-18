@@ -42,15 +42,23 @@ stratKf = StratifiedKFold( n_splits = folds)
 errorTrain = []
 errorValidation = []
 counter = 0
-
+ind = 0
+smaller = 1
+cs = []
 #maxRange = 100
 #for i in range(1,maxRange+1):
-for c in np.arange(0.001,0.006,0.0001): 
+for c in np.arange(1e-4,1e-3,1e-4): 
     tr_err = va_err = 0 
     for tr_ix, val_ix in stratKf.split(Y_r, Y_r):
         r, v = calc_fold(X_r,  Y_r, tr_ix, val_ix,c)
         tr_err += r
         va_err += v
+    
+    cs.append(c)
+    if(smaller>va_err/folds):
+        smaller = va_err/folds
+        ind = counter
+        
     counter+=1
     errorTrain.append(tr_err/folds)
     errorValidation.append(va_err/folds)
@@ -59,7 +67,8 @@ for c in np.arange(0.001,0.006,0.0001):
 #mmm = np.abs(errorValidation - sum(errorValidation)/(len(c_par)*maxRange) ).argmin()
 #best_param_C.append(c_par[mmm])     
        
-print("melhores C's : ",sum(errorValidation)/counter)    
+print("media C's : ",sum(errorValidation)/counter)
+print("escolhido :", cs[ind])    
 line1, = plt.plot(errorTrain, label="errorTrain", linestyle='--')
 line2, = plt.plot(errorValidation, label="errorValidation", linestyle='--',color="red")
 plt.legend(bbox_to_anchor=(0., 1.02, 1., .102), loc='lower left', ncol=2, mode="expand", borderaxespad=0.)
@@ -72,6 +81,12 @@ X_t = data[:,0:4]
 means = np.mean(X_t,axis=0)
 stdevs = np.std(X_t,axis=0)
 X_t = (X_t-means)/stdevs
+
+reg = LogisticRegression(C=1e19, tol=1e-10)
+reg.fit(Xs, Ys)
+erroVal = 1 - reg.score(X_t,Y_t)
+print("resultado do teste erro de avaliação:",erroVal)
+
     
 #plt.savefig('final_plot.png', dpi=300)
 #plt.close()
