@@ -78,8 +78,8 @@ mat = np.loadtxt("TP1_test.tsv",delimiter='\t')
 data = shuffle(mat)
 Y_t = data[:,4].astype(int)
 X_t = data[:,0:4]
-means = np.mean(X_t,axis=0)
-stdevs = np.std(X_t,axis=0)
+#means = np.mean(X_t,axis=0)
+#stdevs = np.std(X_t,axis=0)
 X_t = (X_t-means)/stdevs
 
 reg = LogisticRegression(C=1e19, tol=1e-10)
