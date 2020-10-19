@@ -34,8 +34,6 @@ Observations:
 import time
 import numpy as np
 import matplotlib.pyplot as plt
-import matplotlib.patches as mpatches
-from TP1_aux import poly_mat
 from TP1_aux import create_plot
 #
 from sklearn.linear_model import LogisticRegression
@@ -127,8 +125,8 @@ Xs = (Xs-means)/stdevs
 #Tests
 Y_finaltest = tests[:,4].astype(int)
 X_finaltest = tests[:,0:4]
-finaltest_means = np.mean(X_finaltest,axis=0)
-finaltest_stdevs = np.std(X_finaltest,axis=0)
+finaltest_means = means
+finaltest_stdevs = stdevs
 X_finaltest = (X_finaltest-finaltest_means)/finaltest_stdevs
 
 print("Preparing training set test/validation")
