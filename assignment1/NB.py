@@ -6,7 +6,7 @@ Created on Mon Oct 19 19:36:15 2020
 """
 import matplotlib.pyplot as plt
 import numpy as np
-from sklearn.neighbors.kde import KernelDensity
+from sklearn.neighbors import KernelDensity
 from sklearn.model_selection import StratifiedKFold,train_test_split
 from sklearn.utils import shuffle
 import matplotlib.pyplot as plt
@@ -57,7 +57,7 @@ def do_bayes():
      
      e_train,p_train,e_test,p_test = split_data(features,0.33)
      e_hists = make_hists(e_train,features)
-     print(e_train,p_train,e_test,p_test)
+     
      p_hists = make_hists(p_train,features)
      tot_len = e_train.shape[0]+p_train.shape[0]
      e_log = np.log(float(e_train.shape[0])/tot_len)
@@ -70,5 +70,21 @@ def do_bayes():
      print('\tE\tP')
      print(f'E\t{sum(1-c_e):.0f}\t{sum(1-c_p):.0f}')
      print(f'P\t{sum(c_e):.0f}\t{sum(c_p):.0f}')
- 
+
+    
+from sklearn.naive_bayes import GaussianNB
+
+
+mata = np.loadtxt("TP1_test.tsv",delimiter='\t')
+dataa = shuffle(mata)
+Y_t = dataa[:,4].astype(int)
+X_t = dataa[:,0:4]
+X_t = (X_t-means)/stdevs
+
+clf = GaussianNB()
+clf.fit(Xs, Ys)
+print(clf.score(X_t,Y_t))
+
+
+
 do_bayes()
