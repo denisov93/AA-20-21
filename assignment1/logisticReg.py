@@ -47,7 +47,7 @@ smaller = 1
 cs = []
 #maxRange = 100
 #for i in range(1,maxRange+1):
-for c in np.arange(1e-4,1e-3,1e-4): 
+for c in np.arange(1e-4,1e-2,1e-4): 
     tr_err = va_err = 0 
     for tr_ix, val_ix in stratKf.split(Y_r, Y_r):
         r, v = calc_fold(X_r,  Y_r, tr_ix, val_ix,c)
@@ -82,7 +82,7 @@ X_t = data[:,0:4]
 #stdevs = np.std(X_t,axis=0)
 X_t = (X_t-means)/stdevs
 
-reg = LogisticRegression(C=1e19, tol=1e-10)
+reg = LogisticRegression(C=cs[ind], tol=1e-10)
 reg.fit(Xs, Ys)
 erroVal = 1 - reg.score(X_t,Y_t)
 print("resultado do teste erro de avaliação:",erroVal)

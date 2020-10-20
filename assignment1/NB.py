@@ -21,70 +21,58 @@ means = np.mean(Xs,axis=0)
 stdevs = np.std(Xs,axis=0)
 Xs = (Xs-means)/stdevs
 
-def make_hists(data,features):
-    hists = []
-    for feat in features:
-        hists.append(np.ones(len(feat)))
-    for ix in range(len(hists)):
-        hists[ix] = np.log(hists[ix]/float(data.shape[0]+len(features[ix])))
-    return hists
+
+def bayes(X,Y, train_ix, valid_ix, bandwidth):
+    t_0 = X[Y == 0,:]
+    t_1 = X[Y == 1,:]
     
-def split_data(features,test_fraction): 
-     oks = Xs[Ys==0,:]
-     noks = Xs[Ys==1,:]
-     e_test_points = int(test_fraction*oks.shape[0])
-     e_train = oks[e_test_points:,:]
-     e_test = oks[:e_test_points,:]
-     p_test_points = int(test_fraction*noks.shape[0])
-     p_train = noks[p_test_points:,:]
-     p_test = noks[:p_test_points,:]
-     return e_train,p_train,e_test,p_test
-
-def classify(e_class,e_log,p_class,p_log,feat_mat):
-     classes = np.zeros(feat_mat.shape[0])
-     for row in range(feat_mat.shape[0]):
-         e_sum = e_log
-         p_sum = p_log
-         for column in range(feat_mat.shape[1]):
-             e_sum = e_sum + e_class[column][int(feat_mat[row,column])]
-             p_sum = p_sum + p_class[column][int(feat_mat[row,column])]
-         if e_sum<p_sum:
-             classes[row]=1
-     return classes
-
-def do_bayes():
-     features = Xs
-     
-     e_train,p_train,e_test,p_test = split_data(features,0.33)
-     e_hists = make_hists(e_train,features)
-     
-     p_hists = make_hists(p_train,features)
-     tot_len = e_train.shape[0]+p_train.shape[0]
-     e_log = np.log(float(e_train.shape[0])/tot_len)
-     p_log = np.log(float(p_train.shape[0])/tot_len)
-     c_e = classify(e_hists,e_log,p_hists,p_log,e_test)
-     c_p = classify(e_hists,e_log,p_hists,p_log,p_test)
-     errors = sum(c_e)+sum(1-c_p)
-     error_perc = float(errors)/(len(c_e)+len(c_p))*100
-     print(f'{errors:.0f} errors; {error_perc:.2f}% error rate')
-     print('\tE\tP')
-     print(f'E\t{sum(1-c_e):.0f}\t{sum(1-c_p):.0f}')
-     print(f'P\t{sum(c_e):.0f}\t{sum(c_p):.0f}')
-
+    for i in range(0,len(t_0),1):
+        vals = t_0[i]
+        if i == 0 :
+            vals = np.log( abs(vals) )
+        else :
+            vals = np.log( abs(vals) )+t_0[i-1]  
+        t_0[i] = vals
+        
+    for i in range(0,len(t_1),1):
+        vals = t_1[i]
+        if i == 0 :
+            vals = np.log( abs(vals) )
+        else :
+            vals = np.log( abs(vals) ) + t_1[i-1]  
+        t_1[i] = vals
     
-from sklearn.naive_bayes import GaussianNB
+    
+    kde_0_0 = KernelDensity(kernel='gaussian', bandwidth=bandwidth).fit(t_0[:,0].reshape(-1, 1))    
+    kde_0_1 = KernelDensity(kernel='gaussian', bandwidth=bandwidth).fit(t_0[:,1].reshape(-1, 1))
+    kde_0_2 = KernelDensity(kernel='gaussian', bandwidth=bandwidth).fit(t_0[:,2].reshape(-1, 1))
+    kde_0_3 = KernelDensity(kernel='gaussian', bandwidth=bandwidth).fit(t_0[:,3].reshape(-1, 1))
+    kde_1_0 = KernelDensity(kernel='gaussian', bandwidth=bandwidth).fit(t_1[:,0].reshape(-1, 1))
+    kde_1_1 = KernelDensity(kernel='gaussian', bandwidth=bandwidth).fit(t_1[:,1].reshape(-1, 1))
+    kde_1_2 = KernelDensity(kernel='gaussian', bandwidth=bandwidth).fit(t_1[:,2].reshape(-1, 1))
+    kde_1_3 = KernelDensity(kernel='gaussian', bandwidth=bandwidth).fit(t_1[:,3].reshape(-1, 1))
+     
+    print (np.argmax(kde_0_0.score_samples(t_0[:,0].reshape(-1, 1)))
+            ,np.argmax(kde_0_1.score_samples(t_0[:,1].reshape(-1, 1)))
+            ,np.argmax(kde_0_2.score_samples(t_0[:,2].reshape(-1, 1)))
+            ,np.argmax(kde_0_3.score_samples(t_0[:,3].reshape(-1, 1)))
+            ,np.argmax(kde_1_0.score_samples(t_0[:,0].reshape(-1, 1)))
+            ,np.argmax(kde_1_1.score_samples(t_0[:,1].reshape(-1, 1)))
+            ,np.argmax(kde_1_2.score_samples(t_0[:,2].reshape(-1, 1)))
+            ,np.argmax(kde_1_3.score_samples(t_0[:,3].reshape(-1, 1)))
+            )
+    
+X_r,X_t,Y_r,Y_t = train_test_split(Xs, Ys, test_size=0.33, stratify = Ys)
+    
+folds = 5
+stratKf = StratifiedKFold( n_splits = folds)    
+'''
+for b in np.arange(0.01,1,0.02): 
+    tr_err = va_err = 0 
+    for tr_ix, val_ix in stratKf.split(Y_r, Y_r):
+        r, v = bayes(X_r,  Y_r, tr_ix, val_ix,b)
+        tr_err += r
+        va_err += v    
 
-
-mata = np.loadtxt("TP1_test.tsv",delimiter='\t')
-dataa = shuffle(mata)
-Y_t = dataa[:,4].astype(int)
-X_t = dataa[:,0:4]
-X_t = (X_t-means)/stdevs
-
-clf = GaussianNB()
-clf.fit(Xs, Ys)
-print(clf.score(X_t,Y_t))
-
-
-
-do_bayes()
+'''   
+bayes(X_r,  Y_r, 0, 0,1) 
