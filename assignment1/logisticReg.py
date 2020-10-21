@@ -33,7 +33,7 @@ Xs = (Xs-means)/stdevs
 
 best_param_C = []
 
-c_par = [0.0005,0.001,0.0025,0.005,0.01,0.05]
+c_par = [1e-2,1e-1,1,1e1,1e2,1e3,1e4,1e5,1e6,1e7,1e7,1e8,1e9,1e10,1e11,1e12]
 #for j in range(1,6):
 X_r,X_t,Y_r,Y_t = train_test_split(Xs, Ys, test_size=0.33, stratify = Ys)
 
@@ -47,7 +47,7 @@ smaller = 1
 cs = []
 #maxRange = 100
 #for i in range(1,maxRange+1):
-for c in np.arange(1e-4,1e-2,1e-4): 
+for c in c_par: 
     tr_err = va_err = 0 
     for tr_ix, val_ix in stratKf.split(Y_r, Y_r):
         r, v = calc_fold(X_r,  Y_r, tr_ix, val_ix,c)

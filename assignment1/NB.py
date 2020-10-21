@@ -12,6 +12,7 @@ from sklearn.utils import shuffle
 import matplotlib.pyplot as plt
 from scipy.stats import norm
 
+n_features = 4
 
 mat = np.loadtxt("TP1_train.tsv",delimiter='\t')
 data = shuffle(mat)
@@ -23,56 +24,81 @@ Xs = (Xs-means)/stdevs
 
 
 def bayes(X,Y, train_ix, valid_ix, bandwidth):
-    t_0 = X[Y == 0,:]
-    t_1 = X[Y == 1,:]
     
-    for i in range(0,len(t_0),1):
-        vals = t_0[i]
-        if i == 0 :
-            vals = np.log( abs(vals) )
-        else :
-            vals = np.log( abs(vals) )+t_0[i-1]  
-        t_0[i] = vals
-        
-    for i in range(0,len(t_1),1):
-        vals = t_1[i]
-        if i == 0 :
-            vals = np.log( abs(vals) )
-        else :
-            vals = np.log( abs(vals) ) + t_1[i-1]  
-        t_1[i] = vals
+    #fit
     
+    t_0 = X[Y == 0,:] #real
+    t_1 = X[Y == 1,:] #fakes
     
-    kde_0_0 = KernelDensity(kernel='gaussian', bandwidth=bandwidth).fit(t_0[:,0].reshape(-1, 1))    
-    kde_0_1 = KernelDensity(kernel='gaussian', bandwidth=bandwidth).fit(t_0[:,1].reshape(-1, 1))
-    kde_0_2 = KernelDensity(kernel='gaussian', bandwidth=bandwidth).fit(t_0[:,2].reshape(-1, 1))
-    kde_0_3 = KernelDensity(kernel='gaussian', bandwidth=bandwidth).fit(t_0[:,3].reshape(-1, 1))
-    kde_1_0 = KernelDensity(kernel='gaussian', bandwidth=bandwidth).fit(t_1[:,0].reshape(-1, 1))
-    kde_1_1 = KernelDensity(kernel='gaussian', bandwidth=bandwidth).fit(t_1[:,1].reshape(-1, 1))
-    kde_1_2 = KernelDensity(kernel='gaussian', bandwidth=bandwidth).fit(t_1[:,2].reshape(-1, 1))
-    kde_1_3 = KernelDensity(kernel='gaussian', bandwidth=bandwidth).fit(t_1[:,3].reshape(-1, 1))
-     
-    print (np.argmax(kde_0_0.score_samples(t_0[:,0].reshape(-1, 1)))
-            ,np.argmax(kde_0_1.score_samples(t_0[:,1].reshape(-1, 1)))
-            ,np.argmax(kde_0_2.score_samples(t_0[:,2].reshape(-1, 1)))
-            ,np.argmax(kde_0_3.score_samples(t_0[:,3].reshape(-1, 1)))
-            ,np.argmax(kde_1_0.score_samples(t_0[:,0].reshape(-1, 1)))
-            ,np.argmax(kde_1_1.score_samples(t_0[:,1].reshape(-1, 1)))
-            ,np.argmax(kde_1_2.score_samples(t_0[:,2].reshape(-1, 1)))
-            ,np.argmax(kde_1_3.score_samples(t_0[:,3].reshape(-1, 1)))
-            )
+    # log(A/ (A + B ) )
+    p_a = t_0.shape[0]
+    p_b = t_1.shape[1]
+    p_uni = p_a + p_b
+    
+    p_0 =  np.log( p_a / p_uni )
+    p_1 =  np.log( p_b / p_uni )
+    
+    features_0 = [] #features of real notes
+    features_1 = [] #features of fake notes
+    
+    for i in range(n_features):
+        features_0[i] = KernelDensity(kernel='gaussian',bandwidth=bandwidth).fit(t_0[:,i].reshape(-1,1))
+        features_1[i] = KernelDensity(kernel='gaussian',bandwidth=bandwidth).fit(t_1[:,i].reshape(-1,1))
+    
+    #prediction
+    
+
     
 X_r,X_t,Y_r,Y_t = train_test_split(Xs, Ys, test_size=0.33, stratify = Ys)
     
 folds = 5
 stratKf = StratifiedKFold( n_splits = folds)    
-'''
-for b in np.arange(0.01,1,0.02): 
+errorTrain = []
+errorValidation = []
+best_err = 1e12
+best_bw = 1
+
+for bandwidth in np.arange(0.02,0.06,0.02): 
     tr_err = va_err = 0 
     for tr_ix, val_ix in stratKf.split(Y_r, Y_r):
-        r, v = bayes(X_r,  Y_r, tr_ix, val_ix,b)
+        r, v = bayes(X_r,Y_r, tr_ix, val_ix,bandwidth)
         tr_err += r
         va_err += v    
+    
+    if tr_err < best_err:
+        best_err = tr_err
+        best_bw = bandwidth
+        
+    errorTrain.apend(tr_err)
+    errorValidation.append(va_err)
+   
 
-'''   
-bayes(X_r,  Y_r, 0, 0,1) 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
