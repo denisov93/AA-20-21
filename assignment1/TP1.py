@@ -34,7 +34,6 @@ Observations:
 import time
 import numpy as np
 import matplotlib.pyplot as plt
-from TP1_aux import create_plot
 #
 from sklearn.linear_model import LogisticRegression
 from sklearn.neighbors import KernelDensity #reminder: Needs to find the optimum value for the bandwitdh parameter of the kernel density estimators
@@ -64,24 +63,17 @@ def showLoadShuffleDebug():
     print("Total: "+str(len(train)))
     sepn("Loading & Shuffle: Complete")
 
-def printProgressBar (iteration, total, decimals = 1, printEnd = "\r"):
-    """
-    Call in a loop to create terminal progress bar
+def printProgressBar (iteration, total, decimals = 1):
+    """Makes a % loading
+    
     @params:
-        iteration   - Required  : current iteration (Int)
-        total       - Required  : total iterations (Int)
-        prefix      - Optional  : prefix string (Str)
-        suffix      - Optional  : suffix string (Str)
-        decimals    - Optional  : positive number of decimals in percent complete (Int)
-        length      - Optional  : character length of bar (Int)
-        fill        - Optional  : bar fill character (Str)
-        printEnd    - Optional  : end character (e.g. "\r", "\r\n") (Str)
+        iteration - Required : current iteration (Int)
+        total     - Required : total iterations (Int)
+        decimals  - Optional : number of decimals (Int)
     """
     percent = ("{0:." + str(decimals) + "f}").format(100 * (iteration / float(total)))
-    print(f'\r({percent}%)', end = printEnd)
-    # Print New Line on Complete
-    if iteration == total: 
-        print()
+    print(f'\r({percent}%)', end = "\r")
+    if iteration == total: print()
 #
 
 #Other
@@ -125,17 +117,15 @@ Xs = (Xs-means)/stdevs
 #Tests
 Y_finaltest = tests[:,4].astype(int)
 X_finaltest = tests[:,0:4]
-finaltest_means = means
-finaltest_stdevs = stdevs
-X_finaltest = (X_finaltest-finaltest_means)/finaltest_stdevs
+X_finaltest = (X_finaltest-means)/stdevs
 
 print("Preparing training set test/validation")
 X_train,X_test,Y_train,Y_test = train_test_split(Xs, Ys, test_size=0.33, stratify = Ys)
-print(X_train)
-print(Y_train)
+#print(X_train)
+#print(Y_train)
 print("Preparing set for final test")
-print(Y_finaltest)
-print(X_finaltest)
+#print(Y_finaltest)
+#print(X_finaltest)
 sepn("Standardizing: Complete")
 
 sep("StratifiedKFold")
@@ -189,7 +179,7 @@ line2, = plt.plot(errorValidation, label="Validation Err", linestyle='--', color
 legend = plt.legend(handles=[line1,line2], loc='upper right')
 
 ax = plt.gca().add_artist(legend)
-plt.savefig('error_validation_plot.png', dpi=300)
+plt.savefig('LR.png', dpi=300)
 plt.show()
 plt.close()
 
