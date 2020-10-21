@@ -26,7 +26,7 @@ Xs = (Xs-means)/stdevs
 def bayes(X,Y, train_ix, valid_ix, bandwidth):
     
     #fit
-    
+    length = X.shape[0] #numero de elementos
     t_0 = X[Y == 0,:] #real
     t_1 = X[Y == 1,:] #fakes
     
@@ -42,12 +42,20 @@ def bayes(X,Y, train_ix, valid_ix, bandwidth):
     features_1 = [] #features of fake notes
     
     for i in range(n_features):
-        features_0[i] = KernelDensity(kernel='gaussian',bandwidth=bandwidth).fit(t_0[:,i].reshape(-1,1))
-        features_1[i] = KernelDensity(kernel='gaussian',bandwidth=bandwidth).fit(t_1[:,i].reshape(-1,1))
+        features_0[i] = KernelDensity(kernel='gaussian',bandwidth=bandwidth).fit(t_0[:,i].reshape(-1,1)).score_samples(X[:,i].reshape(-1,1))
+        features_1[i] = KernelDensity(kernel='gaussian',bandwidth=bandwidth).fit(t_1[:,i].reshape(-1,1)).score_samples(X[:,i].reshape(-1,1))
     
     #prediction
-    
+    prob_0 = p_0 * np.ones(length)
+    prob_1 = p_1 * np.ones(length)
 
+    prob_0 += features_0
+    prob_1 += features_0
+    
+    '''
+    Aqui tem de se acabar
+
+    '''
     
 X_r,X_t,Y_r,Y_t = train_test_split(Xs, Ys, test_size=0.33, stratify = Ys)
     

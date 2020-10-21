@@ -4,16 +4,16 @@ Created on Sun Oct 11 21:47:14 2020
 
 @author: adeni
 """
-
+'''
+com paramentros de C obtemos valores com erro de perto de 10% seria possivel diminuir?
+'''
 import numpy as np
 from sklearn.utils import shuffle
 import matplotlib.pyplot as plt
 from sklearn.model_selection import StratifiedKFold,train_test_split
 from sklearn.linear_model import LogisticRegression
 
-def calc_fold(X,Y, train_ix,valid_ix,C):
-    """return error for train and validation sets"""
-    
+def calc_fold(X,Y, train_ix,valid_ix,C):    
     reg = LogisticRegression(C=C, tol=1e-10)
     reg.fit(X[train_ix],Y[train_ix])
     erroVal = 1 - reg.score(X[valid_ix],Y[valid_ix])
@@ -29,12 +29,10 @@ stdevs = np.std(Xs,axis=0)
 Xs = (Xs-means)/stdevs
 
 
-
-
 best_param_C = []
 
 c_par = [1e-2,1e-1,1,1e1,1e2,1e3,1e4,1e5,1e6,1e7,1e7,1e8,1e9,1e10,1e11,1e12]
-#for j in range(1,6):
+
 X_r,X_t,Y_r,Y_t = train_test_split(Xs, Ys, test_size=0.33, stratify = Ys)
 
 folds = 5
@@ -45,8 +43,7 @@ counter = 0
 ind = 0
 smaller = 1
 cs = []
-#maxRange = 100
-#for i in range(1,maxRange+1):
+
 for c in c_par: 
     tr_err = va_err = 0 
     for tr_ix, val_ix in stratKf.split(Y_r, Y_r):
@@ -64,9 +61,7 @@ for c in c_par:
     errorValidation.append(va_err/folds)
     print(c, ':', tr_err/folds, va_err/folds)
 
-#mmm = np.abs(errorValidation - sum(errorValidation)/(len(c_par)*maxRange) ).argmin()
-#best_param_C.append(c_par[mmm])     
-       
+      
 print("media C's : ",sum(errorValidation)/counter)
 print("escolhido :", cs[ind])    
 line1, = plt.plot(errorTrain, label="errorTrain", linestyle='--')
@@ -78,8 +73,7 @@ mat = np.loadtxt("TP1_test.tsv",delimiter='\t')
 data = shuffle(mat)
 Y_t = data[:,4].astype(int)
 X_t = data[:,0:4]
-#means = np.mean(X_t,axis=0)
-#stdevs = np.std(X_t,axis=0)
+
 X_t = (X_t-means)/stdevs
 
 reg = LogisticRegression(C=cs[ind], tol=1e-10)
