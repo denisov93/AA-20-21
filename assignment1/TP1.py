@@ -293,5 +293,9 @@ print("True Error GS: ",round(t_err_gs,5))
 t_err_nb = np.mean(pred_bayes - Y_finaltest)**2
 print("True Error NB: ",'%f' % round(t_err_nb,9))
 
-
-
+n_error_lg = aproxNormalTest(sum(Y_finaltest) ,len(Y_finaltest),sum(pred_logistic))
+print("Aprox Normal Distribution LR:",n_error_lg)
+n_error_gs = aproxNormalTest(sum(Y_finaltest) ,len(Y_finaltest),sum(pred_gaussian))
+print("Aprox Normal Distribution LR:",n_error_gs)
+n_error_nb = aproxNormalTest(sum(Y_finaltest) ,len(Y_finaltest),sum(pred_bayes))
+print("Aprox Normal Distribution LR:",n_error_nb)
