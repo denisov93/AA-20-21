@@ -48,6 +48,17 @@ def sepn(text):
     sep(text)
     print("\n")
 
+def testMc(estim1,estim2,test):
+    e1 = 0
+    e10 = 0
+    for i in range(len(pred_bayes)):
+        if ( estim1[i] != test[i] and estim2[i] == test[i] ) :
+            e1+=1
+        if ( estim1[i] == test[i] and estim2[i] != test[i] ):
+            e10+=1
+    val = McNemarTest(e1,e10)
+    return val    
+
 def printProgressBar (iteration, total, decimals = 1):
     """Makes a % loading
     
@@ -59,6 +70,19 @@ def printProgressBar (iteration, total, decimals = 1):
     percent = ("{0:." + str(decimals) + "f}").format(100 * (iteration / float(total)))
     print(f'\r({percent}%)', end = "\r")
     if iteration == total: print()
+
+def McNemarTest(e01,e10) -> float:
+    '''Value of Estatisticly Diferent Mistakes done by 2 classifiers
+        with 95% confidence level of 3.84        
+    @params:
+        e01 - Required : number of examples this classifer got wrong (Int)
+        e10 - Required : number of examples this classifer got right (Int)        
+    @return: 
+        X   - value'''
+    X = ((abs(e01-e10)-1)**2)/(e01+e10)
+    print("[McNemar's Test'] Classifier is likely better if "+str(X)+" >= 3.84")
+    return X    
+    
 #Logistic Regression Calc Folds
 def calc_fold_logistic(X,Y, train_ix,valid_ix,C):    
     reg = LogisticRegression(C=C, tol=1e-10)
@@ -148,6 +172,10 @@ plt.close()
 
 reg = LogisticRegression(C=cs[ind], tol=1e-10)
 reg.fit(Xs, Ys)
+
+
+
+
 erroVal = 1 - reg.score(X_finaltest,Y_finaltest)
 '''
 FAZER CONTAGEM DE ERROS e SUCESSOS
@@ -158,6 +186,7 @@ sep("Gaussian")
 
 gaus = GaussianNB()
 gaus.fit(Xs, Ys)
+
 erroVal = 1 - gaus.score(X_finaltest,Y_finaltest)
 print("resultado do teste erro de avaliação:",erroVal)
 
@@ -243,11 +272,24 @@ plt.show()
 plt.savefig('NB.png', dpi=300)
 plt.close()
    
-r,v = bayes(Xs,Ys, X_finaltest,Y_finaltest, best_bw)
-error = 1 - accuracy_score(v , Y_finaltest)
+r,pred_bayes = bayes(Xs,Ys, X_finaltest,Y_finaltest, best_bw)
+error = 1 - accuracy_score(pred_bayes , Y_finaltest)
 print("Best Bandwidth Found "+str(best_bw)+" with Error of",error)
-'''
-FAZER CONTAGEM DE ERROS e SUCESSOS
-'''
+
+
+
+
+
+pred_logistic = reg.predict(X_finaltest)
+pred_gaussian = gaus.predict(X_finaltest)
+
+t_p_l = testMc(pred_bayes,pred_logistic,Y_finaltest)
+print("Mc test For NB vs LR:",round(t_p_l,2))
+
+t_l_g = testMc(pred_logistic,pred_gaussian,Y_finaltest)
+print("Mc test For LR vs GS:",round(t_l_g,2))
+
+t_g_p = testMc(pred_gaussian,pred_bayes,Y_finaltest)
+print("Mc test For GS vs NB:",round(t_g_p,2))
 
 
