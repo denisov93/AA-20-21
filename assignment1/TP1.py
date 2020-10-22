@@ -276,20 +276,22 @@ r,pred_bayes = bayes(Xs,Ys, X_finaltest,Y_finaltest, best_bw)
 error = 1 - accuracy_score(pred_bayes , Y_finaltest)
 print("Best Bandwidth Found "+str(best_bw)+" with Error of",error)
 
-
-
-
-
 pred_logistic = reg.predict(X_finaltest)
 pred_gaussian = gaus.predict(X_finaltest)
 
 t_p_l = testMc(pred_bayes,pred_logistic,Y_finaltest)
 print("Mc test For NB vs LR:",round(t_p_l,2))
-
 t_l_g = testMc(pred_logistic,pred_gaussian,Y_finaltest)
 print("Mc test For LR vs GS:",round(t_l_g,2))
-
 t_g_p = testMc(pred_gaussian,pred_bayes,Y_finaltest)
 print("Mc test For GS vs NB:",round(t_g_p,2))
+
+t_err_lg = np.mean(pred_logistic - Y_finaltest)**2
+print("True Error LR: ",t_err_lg) 
+t_err_gs = np.mean(pred_gaussian - Y_finaltest)**2
+print("True Error GS: ",t_err_gs) 
+t_err_nb = np.mean(pred_bayes - Y_finaltest)**2
+print("True Error NB: ",t_err_nb) 
+
 
 
