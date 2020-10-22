@@ -4,9 +4,7 @@ Created on Sun Oct 11 21:47:14 2020
 
 @author: adeni
 """
-'''
-com paramentros de C obtemos valores com erro de perto de 10% seria possivel diminuir?
-'''
+
 import numpy as np
 from sklearn.utils import shuffle
 import matplotlib.pyplot as plt
@@ -31,7 +29,11 @@ Xs = (Xs-means)/stdevs
 
 best_param_C = []
 
-c_par = [1e-2,1e-1,1,1e1,1e2,1e3,1e4,1e5,1e6,1e7,1e7,1e8,1e9,1e10,1e11,1e12]
+c_par = []
+c_n = 1e-3
+for x in range(16):
+    c_par.append(c_n)
+    c_n *=10
 
 X_r,X_t,Y_r,Y_t = train_test_split(Xs, Ys, test_size=0.33, stratify = Ys)
 
@@ -59,15 +61,28 @@ for c in c_par:
     counter+=1
     errorTrain.append(tr_err/folds)
     errorValidation.append(va_err/folds)
-    print(c, ':', tr_err/folds, va_err/folds)
+    #print(c, ':', tr_err/folds, va_err/folds)
 
       
 print("media C's : ",sum(errorValidation)/counter)
 print("escolhido :", cs[ind])    
-line1, = plt.plot(errorTrain, label="errorTrain", linestyle='--')
-line2, = plt.plot(errorValidation, label="errorValidation", linestyle='--',color="red")
-plt.legend(bbox_to_anchor=(0., 1.02, 1., .102), loc='lower left', ncol=2, mode="expand", borderaxespad=0.)
-plt.show() 
+
+plt.figure(figsize=(8,8), frameon=True)
+ax_lims=(-3,3,-3,3)
+plt.axis(ax_lims)
+plt.subplot(211)
+
+plt.title("Logistic Regression with best C: "+str(cs[ind]))
+
+line1, = plt.plot(errorTrain, label="Train Err", linestyle='-', color='blue')
+line2, = plt.plot(errorValidation, label="Validation Err", linestyle='-', color='green')
+
+legend = plt.legend(handles=[line1,line2], loc='upper right')
+
+ax = plt.gca().add_artist(legend)
+plt.savefig('LR.png', dpi=300)
+plt.show()
+plt.close()
 
 mat = np.loadtxt("TP1_test.tsv",delimiter='\t')
 data = shuffle(mat)
@@ -80,7 +95,6 @@ reg = LogisticRegression(C=cs[ind], tol=1e-10)
 reg.fit(Xs, Ys)
 erroVal = 1 - reg.score(X_t,Y_t)
 print("resultado do teste erro de avaliação:",erroVal)
-
-    
-#plt.savefig('final_plot.png', dpi=300)
-#plt.close()
+   
+plt.savefig('LR.png', dpi=300)
+plt.close()
