@@ -75,12 +75,12 @@ def McNemarTest(e01,e10) -> float:
     '''Value of Estatisticly Diferent Mistakes done by 2 classifiers
         with 95% confidence level of 3.84        
     @params:
-        e01 - Required : number of examples this classifer got wrong (Int)
-        e10 - Required : number of examples this classifer got right (Int)        
+        e01 - Required : n of examples the classifers got wrong and right (Int)
+        e10 - Required : n of examples the classifers got wrong and right (Int)        
     @return: 
         X   - value'''
     X = ((abs(e01-e10)-1)**2)/(e01+e10)
-    print("[McNemar's Test'] Classifier is likely better if "+str(X)+" >= 3.84")
+    print("[McNemar's Test] Classifiers are likely better if "+str(X)+" >= 3.84")
     return X    
     
 #Logistic Regression Calc Folds
@@ -287,11 +287,11 @@ t_g_p = testMc(pred_gaussian,pred_bayes,Y_finaltest)
 print("Mc test For GS vs NB:",round(t_g_p,2))
 
 t_err_lg = np.mean(pred_logistic - Y_finaltest)**2
-print("True Error LR: ",t_err_lg) 
+print("True Error LR: ",round(t_err_lg,5)) 
 t_err_gs = np.mean(pred_gaussian - Y_finaltest)**2
-print("True Error GS: ",t_err_gs) 
+print("True Error GS: ",round(t_err_gs,5)) 
 t_err_nb = np.mean(pred_bayes - Y_finaltest)**2
-print("True Error NB: ",t_err_nb) 
+print("True Error NB: ",'%f' % round(t_err_nb,9))
 
 
 
