@@ -19,14 +19,16 @@ means = np.mean(Xs,axis=0)
 stdevs = np.std(Xs,axis=0)
 Xs = (Xs-means)/stdevs
 
-
-def bayes(X,Y, train_ix, val_ix, bandwidth):     
-    kde = KernelDensity(bandwidth=bandwidth,kernel='gaussian')    
-    #fit   
+def calc_folds(X,Y, train_ix, val_ix, bandwidth):
     X_r = X[train_ix]
     Y_r = Y[train_ix]
     X_v = X[val_ix]
     Y_v = Y[val_ix]
+    r,v = bayes(X_r,Y_r, X_v, Y_v, bandwidth)
+    return r,v
+
+def bayes(X_r,Y_r, X_v, Y_v, bandwidth):     
+    kde = KernelDensity(bandwidth=bandwidth,kernel='gaussian')    
     
     t_0 = X_r[Y_r == 0,:] #real
     t_1 = X_r[Y_r == 1,:] #fakes
@@ -70,14 +72,14 @@ folds = 5
 stratKf = StratifiedKFold( n_splits = folds)    
 errorTrain = []
 errorValidation = []
-best_err = 0.02
+best_err = 1e12
 best_bw = 1
-
-for bandwidth in np.arange(0.02,0.6,0.02): 
+bws = [round(b,3) for b in np.arange(0.02,0.6,0.02) ]
+for bandwidth in bws: 
     tr_err = va_err = 0 
    
     for tr_ix, val_ix in stratKf.split(Y_r, Y_r):
-        r,v = bayes(X_r,Y_r, tr_ix,val_ix, bandwidth) 
+        r,v = calc_folds(X_r,Y_r, tr_ix,val_ix, bandwidth) 
         tr_err += 1 - accuracy_score(r , Y_r[tr_ix])
         va_err += 1 - accuracy_score(v , Y_r[val_ix])
        
@@ -87,22 +89,35 @@ for bandwidth in np.arange(0.02,0.6,0.02):
     errorValidation.append(va_err)  
 
     if va_err < best_err:
-        best_err = tr_err
+        best_err = va_err
         best_bw = bandwidth
 
 
-line1, = plt.plot(errorTrain, label="errorTrain", linestyle='-')
-line2, = plt.plot(errorValidation, label="errorValidation", linestyle='-',color="green")
+plt.figure(figsize=(8,8), frameon=True)
+ax_lims=(-3,3,-3,3)
+plt.axis(ax_lims)
+plt.subplot(211)
 
-plt.legend(bbox_to_anchor=(0., 1.02, 1., .102), loc='lower left', ncol=2, mode="expand", borderaxespad=0.)
-plt.show() 
+plt.title("Naive Bayes with best Bandwidth: "+str(best_bw))
+
+line1, = plt.plot(bws,errorTrain, label="Train Err", linestyle='-', color='blue')
+line2, = plt.plot(bws,errorValidation, label="Validation Err", linestyle='-', color='green')
+
+legend = plt.legend(handles=[line1,line2], loc='lower right')
+
+ax = plt.gca().add_artist(legend)
+
+plt.show()
+
 plt.savefig('NB.png', dpi=300)
-plt.close() 
+
+plt.close()
    
 mat = np.loadtxt("TP1_test.tsv",delimiter='\t')
 data = shuffle(mat)
-Y_t = data[:,4].astype(int)
-X_t = data[:,0:4]
-X_t = (X_t-means)/stdevs
+Y_v = data[:,4].astype(int)
+X_v = data[:,0:4]
 
-bayes = bayes(X_r,Y_r, tr_ix,val_ix, bandwidth)
+r,v = bayes(Xs,Ys, X_v,Y_v, best_bw)
+error = 1 - accuracy_score(v , Y_v)
+print("Best Bandwidth Found "+str(best_bw)+" with Error of",error)

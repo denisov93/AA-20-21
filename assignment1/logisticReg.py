@@ -80,8 +80,11 @@ line2, = plt.plot(errorValidation, label="Validation Err", linestyle='-', color=
 legend = plt.legend(handles=[line1,line2], loc='upper right')
 
 ax = plt.gca().add_artist(legend)
-plt.savefig('LR.png', dpi=300)
+
 plt.show()
+
+plt.savefig('LR.png', dpi=300)
+
 plt.close()
 
 mat = np.loadtxt("TP1_test.tsv",delimiter='\t')
