@@ -31,6 +31,7 @@ Observations:
 
 ##Region Imports
 #
+import math
 import numpy as np
 import matplotlib.pyplot as plt
 #
@@ -59,17 +60,16 @@ def testMc(estim1,estim2,test):
     val = McNemarTest(e1,e10)
     return val    
 
-def printProgressBar (iteration, total, decimals = 1):
-    """Makes a % loading
-    
+def aproxNormalTest(X,N,P) -> float:
+    '''Aprox Normal Distribution
     @params:
-        iteration - Required : current iteration (Int)
-        total     - Required : total iterations (Int)
-        decimals  - Optional : number of decimals (Int)
-    """
-    percent = ("{0:." + str(decimals) + "f}").format(100 * (iteration / float(total)))
-    print(f'\r({percent}%)', end = "\r")
-    if iteration == total: print()
+        X - Required : measured number of errors (Int)
+        N - Required : size of test set (Int)
+        P - Required : expected number of errors (Int)  
+    @return: 
+        Z   - aprox normal distribution (float)'''
+    z = (X-N*P)/(math.sqrt(N*P*(1-P)))
+    return z
 
 def McNemarTest(e01,e10) -> float:
     '''Value of Estatisticly Diferent Mistakes done by 2 classifiers
