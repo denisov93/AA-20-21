@@ -11,7 +11,6 @@ from sklearn.model_selection import StratifiedKFold,train_test_split
 from sklearn.utils import shuffle
 from sklearn.metrics import accuracy_score
 
-
 mat = np.loadtxt("TP1_train.tsv",delimiter='\t')
 data = shuffle(mat)
 Ys = data[:,4].astype(int)
@@ -21,10 +20,8 @@ stdevs = np.std(Xs,axis=0)
 Xs = (Xs-means)/stdevs
 
 
-def bayes(X,Y, train_ix, val_ix, bandwidth):
-     
-    kde = KernelDensity(bandwidth=bandwidth,kernel='gaussian')
-    
+def bayes(X,Y, train_ix, val_ix, bandwidth):     
+    kde = KernelDensity(bandwidth=bandwidth,kernel='gaussian')    
     #fit   
     X_r = X[train_ix]
     Y_r = Y[train_ix]
@@ -36,14 +33,12 @@ def bayes(X,Y, train_ix, val_ix, bandwidth):
     v_0 = X_v[Y_v == 0, :] 
     v_1 = X_v[Y_v == 1, :] 
     
-    
     # log(A/ (A + B ) )
     p_0 =  np.log( t_0.shape[0] / X_r.shape[0] )
     p_1 =  np.log( t_1.shape[0] / X_r.shape[0] )       
     pv_0 = np.log( v_0.shape[0] / X_v.shape[0] )
     pv_1 = np.log( v_1.shape[0] / X_v.shape[0] )
-    
-    
+        
     sum_logs_t_0 = np.ones(X_r.shape[0]) * p_0
     sum_logs_t_1 = np.ones(X_r.shape[0]) * p_1   
     sum_logs_v_0 = np.ones(X_v.shape[0]) * pv_0
@@ -62,11 +57,8 @@ def bayes(X,Y, train_ix, val_ix, bandwidth):
         sum_logs_v_1 += kde.score_samples(X_v[:,[i]])
     
     
-    classes[(sum_logs_t_1 > sum_logs_t_0)] = 1
-     
+    classes[(sum_logs_t_1 > sum_logs_t_0)] = 1   
     classes_n[(sum_logs_v_1 > sum_logs_v_0 )] = 1
-    
-    
             
     return classes,classes_n
     
@@ -107,3 +99,10 @@ plt.show()
 plt.savefig('NB.png', dpi=300)
 plt.close() 
    
+mat = np.loadtxt("TP1_test.tsv",delimiter='\t')
+data = shuffle(mat)
+Y_t = data[:,4].astype(int)
+X_t = data[:,0:4]
+X_t = (X_t-means)/stdevs
+
+bayes = bayes(X_r,Y_r, tr_ix,val_ix, bandwidth)

@@ -6,9 +6,6 @@ Created on Wed Oct 21 13:42:04 2020
 """
 import numpy as np
 from sklearn.utils import shuffle
-import matplotlib.pyplot as plt
-from sklearn.model_selection import StratifiedKFold,train_test_split
-from sklearn.linear_model import LogisticRegression
 from sklearn.naive_bayes import GaussianNB 
 
 
@@ -31,7 +28,3 @@ gaus = GaussianNB()
 gaus.fit(Xs, Ys)
 erroVal = 1 - gaus.score(X_t,Y_t)
 print("resultado do teste erro de avaliação:",erroVal)
-
-    
-#plt.savefig('final_plot.png', dpi=300)
-#plt.close()

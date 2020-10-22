@@ -96,5 +96,3 @@ reg.fit(Xs, Ys)
 erroVal = 1 - reg.score(X_t,Y_t)
 print("resultado do teste erro de avaliação:",erroVal)
    
-plt.savefig('LR.png', dpi=300)
-plt.close()
