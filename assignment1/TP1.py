@@ -60,16 +60,28 @@ def testMc(estim1,estim2,test):
     val = McNemarTest(e1,e10)
     return val    
 
-def aproxNormalTest(X,N,P) -> float:
+def aproxNormalTest(X:float,N:int,P:int) -> float:
     '''Aprox Normal Distribution
     @params:
-        X - Required : measured number of errors (Int)
+        X - Required : measured number of errors (Float)
         N - Required : size of test set (Int)
         P - Required : expected number of errors (Int)  
     @return: 
         Z   - aprox normal distribution (float)'''
-    z = (X-N*P)/(math.sqrt(N*P*(1-P)))
-    return z
+    #nume = (X-N*P)
+    #deno = (math.sqrt(N*P*(1-P)))
+    #z = nume/deno
+    return N*(1-X)
+
+def calcDeviation(X:float,N:int) -> float:
+    '''σ of the normal destribution
+    @params:
+        X - Required : measured number of errors (Float)
+        N - Required : size of test set (Int)
+    @return: 
+        σ - aprox normal distribution (float)'''
+    dev = 1.96*(math.sqrt((N*X)*(1-X)))
+    return dev
 
 def McNemarTest(e01,e10) -> float:
     '''Value of Estatisticly Diferent Mistakes done by 2 classifiers
@@ -272,8 +284,8 @@ plt.show()
 plt.savefig('NB.png', dpi=300)
 plt.close()
    
-r,pred_bayes = bayes(Xs,Ys, X_finaltest,Y_finaltest, best_bw)
-error = 1 - accuracy_score(pred_bayes , Y_finaltest)
+r,pred_bayes = bayes(Xs, Ys, X_finaltest, Y_finaltest, best_bw)
+error = 1 - accuracy_score(pred_bayes, Y_finaltest)
 print("Best Bandwidth Found "+str(best_bw)+" with Error of",error)
 
 pred_logistic = reg.predict(X_finaltest)
@@ -293,9 +305,14 @@ print("True Error GS: ",round(t_err_gs,5))
 t_err_nb = np.mean(pred_bayes - Y_finaltest)**2
 print("True Error NB: ",'%f' % round(t_err_nb,9))
 
-n_error_lg = aproxNormalTest(sum(Y_finaltest) ,len(Y_finaltest),sum(pred_logistic))
-print("Aprox Normal Distribution LR:",n_error_lg)
-n_error_gs = aproxNormalTest(sum(Y_finaltest) ,len(Y_finaltest),sum(pred_gaussian))
-print("Aprox Normal Distribution LR:",n_error_gs)
-n_error_nb = aproxNormalTest(sum(Y_finaltest) ,len(Y_finaltest),sum(pred_bayes))
-print("Aprox Normal Distribution LR:",n_error_nb)
+size = len(Y_finaltest)
+aprox_NT_l = aproxNormalTest(t_err_lg, size, sum(pred_logistic))
+dev_l = calcDeviation(t_err_lg,size)
+aprox_NT_g = aproxNormalTest(t_err_gs, size, sum(pred_gaussian))
+dev_g = calcDeviation(t_err_gs,size)
+aprox_NT_b = aproxNormalTest(t_err_nb, size, sum(pred_bayes))
+dev_b = calcDeviation(t_err_nb,size)
+
+print("Aprox Normal Distr LR: "+str(round(aprox_NT_l,2))+" ± "+str(round(dev_l,3)))
+print("Aprox Normal Distr GS: "+str(round(aprox_NT_g,2))+" ± "+str(round(dev_g,3)))
+print("Aprox Normal Distr NB: "+str(round(aprox_NT_b,2))+" ± "+str(round(dev_b,3)))
