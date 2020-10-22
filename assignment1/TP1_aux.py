@@ -21,7 +21,7 @@ def McNemarTest(e01,e10) -> float:
         with 95% confidence level of 3.84        
     @params:
         e01 - Required : number of examples this classifer got wrong (Int)
-        e10 - Required : number of examples this classifer got wrong (Int)        
+        e10 - Required : number of examples this classifer got right (Int)        
     @return: 
         X   - value'''
     X = ((abs(e01-e10)-1)**2)/(e01+e10)

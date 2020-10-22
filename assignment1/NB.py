@@ -19,7 +19,8 @@ means = np.mean(Xs,axis=0)
 stdevs = np.std(Xs,axis=0)
 Xs = (Xs-means)/stdevs
 
-def calc_folds(X,Y, train_ix, val_ix, bandwidth):
+      
+def calc_folds_bayes(X,Y, train_ix, val_ix, bandwidth):
     X_r = X[train_ix]
     Y_r = Y[train_ix]
     X_v = X[val_ix]
@@ -57,8 +58,7 @@ def bayes(X_r,Y_r, X_v, Y_v, bandwidth):
         kde.fit(t_1[:,[i]])
         sum_logs_t_1 += kde.score_samples(X_r[:,[i]])
         sum_logs_v_1 += kde.score_samples(X_v[:,[i]])
-    
-    
+        
     classes[(sum_logs_t_1 > sum_logs_t_0)] = 1   
     classes_n[(sum_logs_v_1 > sum_logs_v_0 )] = 1
             
@@ -79,7 +79,7 @@ for bandwidth in bws:
     tr_err = va_err = 0 
    
     for tr_ix, val_ix in stratKf.split(Y_r, Y_r):
-        r,v = calc_folds(X_r,Y_r, tr_ix,val_ix, bandwidth) 
+        r,v = calc_folds_bayes(X_r,Y_r, tr_ix,val_ix, bandwidth) 
         tr_err += 1 - accuracy_score(r , Y_r[tr_ix])
         va_err += 1 - accuracy_score(v , Y_r[val_ix])
        

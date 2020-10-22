@@ -31,7 +31,6 @@ Observations:
 
 ##Region Imports
 #
-import time
 import numpy as np
 import matplotlib.pyplot as plt
 #
@@ -40,28 +39,14 @@ from sklearn.neighbors import KernelDensity #reminder: Needs to find the optimum
 from sklearn.naive_bayes import GaussianNB #reminder: no parameter adjustment
 #
 from sklearn.utils import shuffle
-from sklearn.preprocessing import PolynomialFeatures
-from sklearn.model_selection import train_test_split, KFold, StratifiedKFold
-##End of Region Imports
-
-#Debug
-time_ms = lambda: int(round(time.time() * 1000))
-start = time_ms()
+from sklearn.metrics import accuracy_score
+from sklearn.model_selection import train_test_split, StratifiedKFold
 
 def sep(text):
     print("~~~~~~~ "+text+" ~~~~~~~~~~~~~~~~~")
 def sepn(text):
     sep(text)
     print("\n")
-
-def showLoadShuffleDebug():
-    sep("Tests [V S C E Class]")
-    print(tests)
-    print("Total: "+str(len(tests)))
-    sep("Train [V S C E Class]")
-    print(train)
-    print("Total: "+str(len(train)))
-    sepn("Loading & Shuffle: Complete")
 
 def printProgressBar (iteration, total, decimals = 1):
     """Makes a % loading
@@ -74,25 +59,13 @@ def printProgressBar (iteration, total, decimals = 1):
     percent = ("{0:." + str(decimals) + "f}").format(100 * (iteration / float(total)))
     print(f'\r({percent}%)', end = "\r")
     if iteration == total: print()
-#
-
-#Other
-'''
-def calc_fold(feats, X,Y, train_ix,valid_ix,C=1e12):
-    """return error for train and validation sets"""
-    reg = LogisticRegression(C=C, tol=1e-10)
-    reg.fit(X[train_ix,:feats],Y[train_ix])
-    prob = reg.predict_proba(X[:,:feats])[:,1]
-    squares = (prob-Y)**2
-    return np.mean(squares[train_ix]),np.mean(squares[valid_ix])'''
-
-def calc_fold(X,Y, train_ix,valid_ix,C):
-    """return error for train and validation sets    """
+#Logistic Regression Calc Folds
+def calc_fold_logistic(X,Y, train_ix,valid_ix,C):    
     reg = LogisticRegression(C=C, tol=1e-10)
     reg.fit(X[train_ix],Y[train_ix])
     erroVal = 1 - reg.score(X[valid_ix],Y[valid_ix])
     erroTreino =  1 - reg.score(X[train_ix],Y[train_ix])
-    return (erroTreino, erroVal)
+    return (erroTreino,erroVal)
 
 #File Loading
 def load_file(file):
@@ -104,7 +77,6 @@ train = load_file("TP1_train.tsv")
 #Shuffle
 tests = shuffle(tests)
 train = shuffle(train)
-showLoadShuffleDebug()
 
 #Standardizing
 sep("Standardizing")
@@ -121,74 +93,161 @@ X_finaltest = (X_finaltest-means)/stdevs
 
 print("Preparing training set test/validation")
 X_train,X_test,Y_train,Y_test = train_test_split(Xs, Ys, test_size=0.33, stratify = Ys)
-#print(X_train)
-#print(Y_train)
-print("Preparing set for final test")
-#print(Y_finaltest)
-#print(X_finaltest)
-sepn("Standardizing: Complete")
-
-sep("StratifiedKFold")
 
 folds = 5
 stratKf = StratifiedKFold( n_splits = folds)
-errorTrain = []
-errorValidation = []
 
-best_re = 1e12
-best_C = 1e12
+sep("Logistic Regression")
 
-c_from = 0.0001
-c_to = 0.01
-step = 0.000025
-calc = int((c_to - c_from)/step)
+'''Logistic Regression Area Code '''
+#Create array of C 
+c_par = []
+c_n = 1e-3
+for x in range(16):
+    c_par.append(c_n)
+    c_n *=10
+    
+errorTrain_l = []
+errorValidation_l = []
+
 counter = 0
-print("Calculating "+str(calc)+" values for C")
+ind = 0
+smaller = 1
+cs = []
 
-for c in np.arange(c_from,c_to,step):
-    counter += 1
-    tr_err = va_err = 0
-    printProgressBar(counter,calc)
+for c in c_par: 
+    tr_err = va_err = 0 
     for tr_ix, val_ix in stratKf.split(Y_train, Y_train):
-        r, v = calc_fold(X_train, Y_train, tr_ix, val_ix, c)
+        r, v = calc_fold_logistic(X_train,  Y_train, tr_ix, val_ix,c)
         tr_err += r
         va_err += v
-    errorTrain.append(tr_err/folds)
-    errorValidation.append(va_err/folds)
     
-    if(va_err > tr_err):
-        re = (va_err - tr_err)
-    else: 
-        re = (tr_err - va_err)
-    
-    if(re < best_re):
-        best_re = re
-        best_C = round(c,7)
+    cs.append(c)
+    if(smaller>va_err/folds):
+        smaller = va_err/folds
+        ind = counter
         
-print("Best C: "+str(best_C))
-sep("End of best C ploting")
+    counter+=1
+    errorTrain_l.append(tr_err/folds)
+    errorValidation_l.append(va_err/folds)
+          
+print("Best of C :", cs[ind])    
 
 plt.figure(figsize=(8,8), frameon=True)
 ax_lims=(-3,3,-3,3)
 plt.axis(ax_lims)
 plt.subplot(211)
-
-line1, = plt.plot(errorTrain, label="Train Err", linestyle='--', color='blue')
-line2, = plt.plot(errorValidation, label="Validation Err", linestyle='--', color='green')
-
+plt.title("Logistic Regression with best C: "+str(cs[ind]))
+line1, = plt.plot(errorTrain_l, label="Train Err", linestyle='-', color='blue')
+line2, = plt.plot(errorValidation_l, label="Validation Err", linestyle='-', color='green')
 legend = plt.legend(handles=[line1,line2], loc='upper right')
-
 ax = plt.gca().add_artist(legend)
-plt.savefig('LR.png', dpi=300)
 plt.show()
+plt.savefig('LR.png', dpi=300)
 plt.close()
 
-reg = LogisticRegression(C=1e10, tol=1e-10)
-reg.fit(X_train, Y_train)
+reg = LogisticRegression(C=cs[ind], tol=1e-10)
+reg.fit(Xs, Ys)
 erroVal = 1 - reg.score(X_finaltest,Y_finaltest)
-print(erroVal)
+'''
+FAZER CONTAGEM DE ERROS e SUCESSOS
+'''
+print("resultado do teste erro de avaliação:",erroVal)
 
-#Process Finish
-end = time_ms()
-runtime = end - start
-print("Runtime: "+str(runtime)+"ms")
+sep("Gaussian")
+
+gaus = GaussianNB()
+gaus.fit(Xs, Ys)
+erroVal = 1 - gaus.score(X_finaltest,Y_finaltest)
+print("resultado do teste erro de avaliação:",erroVal)
+
+'''
+All Code For Bayes
+'''
+sep("Naive Bayes")
+
+def calc_folds_bayes(X,Y, train_ix, val_ix, bandwidth):
+    X_r = X[train_ix]
+    Y_r = Y[train_ix]
+    X_v = X[val_ix]
+    Y_v = Y[val_ix]
+    r,v = bayes(X_r,Y_r, X_v, Y_v, bandwidth)
+    return r,v
+
+def bayes(X_r,Y_r, X_v, Y_v, bandwidth):     
+    kde = KernelDensity(bandwidth=bandwidth,kernel='gaussian')    
+    
+    t_0 = X_r[Y_r == 0,:] #real
+    t_1 = X_r[Y_r == 1,:] #fakes
+    v_0 = X_v[Y_v == 0, :] 
+    v_1 = X_v[Y_v == 1, :] 
+    
+    # log(A/ (A + B ) )
+    p_0 =  np.log( t_0.shape[0] / X_r.shape[0] )
+    p_1 =  np.log( t_1.shape[0] / X_r.shape[0] )       
+    pv_0 = np.log( v_0.shape[0] / X_v.shape[0] )
+    pv_1 = np.log( v_1.shape[0] / X_v.shape[0] )
+        
+    sum_logs_t_0 = np.ones(X_r.shape[0]) * p_0
+    sum_logs_t_1 = np.ones(X_r.shape[0]) * p_1   
+    sum_logs_v_0 = np.ones(X_v.shape[0]) * pv_0
+    sum_logs_v_1 = np.ones(X_v.shape[0]) * pv_1    
+    
+    classes = np.zeros(X_r.shape[0])
+    classes_n = np.zeros(X_v.shape[0])
+    
+    for i in range(X_r.shape[1]):
+        kde.fit(t_0[:,[i]])
+        sum_logs_t_0 += kde.score_samples(X_r[:,[i]])
+        sum_logs_v_0 += kde.score_samples(X_v[:,[i]])        
+
+        kde.fit(t_1[:,[i]])
+        sum_logs_t_1 += kde.score_samples(X_r[:,[i]])
+        sum_logs_v_1 += kde.score_samples(X_v[:,[i]])
+        
+    classes[(sum_logs_t_1 > sum_logs_t_0)] = 1   
+    classes_n[(sum_logs_v_1 > sum_logs_v_0 )] = 1
+            
+    return classes,classes_n
+
+errorTrain_b = []
+errorValidation_b = []
+best_err = 1e12
+best_bw = 1
+bws = [round(b,3) for b in np.arange(0.02,0.6,0.02) ]
+for bandwidth in bws: 
+    tr_err = va_err = 0   
+    for tr_ix, val_ix in stratKf.split(Y_train, Y_train):
+        r,v = calc_folds_bayes(X_train,Y_train, tr_ix,val_ix, bandwidth) 
+        tr_err += 1 - accuracy_score(r , Y_train[tr_ix])
+        va_err += 1 - accuracy_score(v , Y_train[val_ix])
+
+    tr_err = tr_err/folds
+    va_err = va_err/folds
+    errorTrain_b.append(tr_err)
+    errorValidation_b.append(va_err)  
+    if va_err < best_err:
+        best_err = va_err
+        best_bw = bandwidth
+
+plt.figure(figsize=(8,8), frameon=True)
+ax_lims=(-3,3,-3,3)
+plt.axis(ax_lims)
+plt.subplot(211)
+plt.title("Naive Bayes with best Bandwidth: "+str(best_bw))
+line1, = plt.plot(bws,errorTrain_b, label="Train Err", linestyle='-', color='blue')
+line2, = plt.plot(bws,errorValidation_b, label="Validation Err", linestyle='-', color='green')
+legend = plt.legend(handles=[line1,line2], loc='lower right')
+ax = plt.gca().add_artist(legend)
+plt.show()
+plt.savefig('NB.png', dpi=300)
+plt.close()
+   
+r,v = bayes(Xs,Ys, X_finaltest,Y_finaltest, best_bw)
+error = 1 - accuracy_score(v , Y_finaltest)
+print("Best Bandwidth Found "+str(best_bw)+" with Error of",error)
+'''
+FAZER CONTAGEM DE ERROS e SUCESSOS
+'''
+
+
