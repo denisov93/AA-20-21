@@ -68,13 +68,7 @@ def aproxNormalTest(P:int ,N:int, X:float) -> float:
         P - Required : expected number of errors (Int)  
     @return: 
         Z   - aprox normal distribution (float)'''
-    nume = (X-N*P)
-    v = N*P*(1-P)
-    if(v<0):
-        deno = math.sqrt(abs(v))*(-1)
-    else:
-        deno = math.sqrt(v)
-    z = nume/deno
+    
     return N*(1-X)
 
 def calcDeviation(X:float,N:int) -> float:
