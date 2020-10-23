@@ -68,7 +68,6 @@ def aproxNormalTest(P:int ,N:int, X:float) -> float:
         P - Required : expected number of errors (Int)  
     @return: 
         Z   - aprox normal distribution (float)'''
-    
     return N*(1-X)
 
 def calcDeviation(X:float,N:int) -> float:
@@ -90,7 +89,7 @@ def McNemarTest(e01,e10) -> float:
     @return: 
         X   - value'''
     X = ((abs(e01-e10)-1)**2)/(e01+e10)
-    print("[McNemar's Test] Classifiers are likely better if "+str(X)+" >= 3.84")
+    print("[McNemar's Test] Classifiers are likely different if "+str(X)+" >= 3.84")
     return X    
     
 #Logistic Regression Calc Folds
@@ -183,13 +182,8 @@ plt.close()
 reg = LogisticRegression(C=cs[ind], tol=1e-10)
 reg.fit(Xs, Ys)
 
-
-
-
 erroVal = 1 - reg.score(X_finaltest,Y_finaltest)
-'''
-FAZER CONTAGEM DE ERROS e SUCESSOS
-'''
+
 print("resultado do teste erro de avaliação:",erroVal)
 
 sep("Gaussian")
@@ -305,9 +299,8 @@ print("True Error NB: ",'%f' % round(t_err_nb,9))
 
 size = len(Y_finaltest)
 
-dev_l = calcDeviation(t_err_lg,size)
 aprox_NT_l = aproxNormalTest( sum(Y_finaltest), size , reg.score(X_finaltest,Y_finaltest))
-
+dev_l = calcDeviation(t_err_lg,size)
 aprox_NT_g = aproxNormalTest( sum(Y_finaltest), size, gaus.score(X_finaltest,Y_finaltest))
 dev_g = calcDeviation(t_err_gs,size)
 aprox_NT_b = aproxNormalTest( sum(Y_finaltest), size,  accuracy_score(pred_bayes, Y_finaltest))
