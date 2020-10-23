@@ -14,11 +14,11 @@ R2: First we shuffle the input data then create new values from the train set su
 
 
 Q3: Explain how you calculated the prior probability of an example belonging to a class (the probability before taking into account the attribute values ​​of the example) in your Naïve Bayes classifier implementation. You may include a relevant piece of your code if this helps you explain.
-R3:
+R3: The prior probability was calculated in the Bayes method by separating data into two classes for each with the Logarithm of specific note class divided by the total of all notes, for example, p0 = (log n0/(n0+n1)) produces prior probability of class n0.
 
 
 Q4: Explain how your Naïve Bayes classifier predicts the class to which a test example belongs. You may include a relevant piece of your code if this helps you explain.
-R4: 
+R4: The estimation of each class was determined a priori after obtaining the sum probabilities of the score_samples. For each class and feature we estimate the value based on sum of previous estimatives.
 
 
 Q5: Explain the effect of the bandwidth parameter on your classifier.
@@ -26,7 +26,7 @@ R5: The bandwidth greatly affects the classifier results, greater value will cau
 
 
 Q6: Explain what effect the C parameter has on the Logistic Regression classifier.
-R6:
+R6: The C parameter is a regularization value, smaller C values will cause bigger effect of the regularization, a good C value will reduce overfitting and lower validation error on a new set.
 
 
 Q7: Explain how you determined the best bandwidth and C parameters for your classifier and the Logistic Regression classifier. You may include a relevant piece of your code if this helps you explain.
@@ -34,7 +34,7 @@ R7: We loop values for "bandwidth" from 0.02 to 0.6 with a step of 0.02 and "C" 
 
 
 Q8: Explain how you obtained the best hypothesis for each classifier after optimizing all parameters.
-R8:
+R8: We trained and fitted the data then we compared the 
 
 
 Q9: Show the best parameters, the estimate of the true error for each hypothesis you obtained (your classifier and the two provided by the library), the ranges in the expected number of errors given by the approximate normal test, the McNemar test values, and discuss what you can conclude from this.
