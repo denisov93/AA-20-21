@@ -60,12 +60,11 @@ def testMc(estim1,estim2,test):
     val = McNemarTest(e1,e10)
     return val    
 
-def aproxNormalTest(P:int ,N:int, X:float) -> float:
+def aproxNormalTest(N:int, X:float) -> float:
     '''Aprox Normal Distribution
     @params:
         X - Required : measured number of errors (Float)
         N - Required : size of test set (Int)
-        P - Required : expected number of errors (Int)  
     @return: 
         Z   - aprox normal distribution (float)'''
     return N*(1-X)
@@ -299,11 +298,11 @@ print("True Error NB: ",'%f' % round(t_err_nb,9))
 
 size = len(Y_finaltest)
 
-aprox_NT_l = aproxNormalTest( sum(Y_finaltest), size , reg.score(X_finaltest,Y_finaltest))
+aprox_NT_l = aproxNormalTest(size, reg.score(X_finaltest,Y_finaltest))
 dev_l = calcDeviation(t_err_lg,size)
-aprox_NT_g = aproxNormalTest( sum(Y_finaltest), size, gaus.score(X_finaltest,Y_finaltest))
+aprox_NT_g = aproxNormalTest(size, gaus.score(X_finaltest,Y_finaltest))
 dev_g = calcDeviation(t_err_gs,size)
-aprox_NT_b = aproxNormalTest( sum(Y_finaltest), size,  accuracy_score(pred_bayes, Y_finaltest))
+aprox_NT_b = aproxNormalTest(size, accuracy_score(pred_bayes, Y_finaltest))
 dev_b = calcDeviation(t_err_nb,size)
 
 print("Aprox Normal Distr LR: "+str(round(aprox_NT_l,2))+" ± "+str(round(dev_l,3)))
