@@ -60,7 +60,7 @@ def testMc(estim1,estim2,test):
     val = McNemarTest(e1,e10)
     return val    
 
-def aproxNormalTest(X:float,N:int,P:int) -> float:
+def aproxNormalTest(P:int ,N:int, X:float) -> float:
     '''Aprox Normal Distribution
     @params:
         X - Required : measured number of errors (Float)
@@ -68,9 +68,13 @@ def aproxNormalTest(X:float,N:int,P:int) -> float:
         P - Required : expected number of errors (Int)  
     @return: 
         Z   - aprox normal distribution (float)'''
-    #nume = (X-N*P)
-    #deno = (math.sqrt(N*P*(1-P)))
-    #z = nume/deno
+    nume = (X-N*P)
+    v = N*P*(1-P)
+    if(v<0):
+        deno = math.sqrt(abs(v))*(-1)
+    else:
+        deno = math.sqrt(v)
+    z = nume/deno
     return N*(1-X)
 
 def calcDeviation(X:float,N:int) -> float:
@@ -306,11 +310,13 @@ t_err_nb = np.mean(pred_bayes - Y_finaltest)**2
 print("True Error NB: ",'%f' % round(t_err_nb,9))
 
 size = len(Y_finaltest)
-aprox_NT_l = aproxNormalTest(t_err_lg, size, sum(pred_logistic))
+
 dev_l = calcDeviation(t_err_lg,size)
-aprox_NT_g = aproxNormalTest(t_err_gs, size, sum(pred_gaussian))
+aprox_NT_l = aproxNormalTest( sum(Y_finaltest), size , reg.score(X_finaltest,Y_finaltest))
+
+aprox_NT_g = aproxNormalTest( sum(Y_finaltest), size, gaus.score(X_finaltest,Y_finaltest))
 dev_g = calcDeviation(t_err_gs,size)
-aprox_NT_b = aproxNormalTest(t_err_nb, size, sum(pred_bayes))
+aprox_NT_b = aproxNormalTest( sum(Y_finaltest), size,  accuracy_score(pred_bayes, Y_finaltest))
 dev_b = calcDeviation(t_err_nb,size)
 
 print("Aprox Normal Distr LR: "+str(round(aprox_NT_l,2))+" ± "+str(round(dev_l,3)))
