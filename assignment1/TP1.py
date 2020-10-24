@@ -165,16 +165,13 @@ for c in c_par:
           
 print("Best of C :", cs[ind])    
 
-plt.figure(figsize=(8,8), frameon=True)
-ax_lims=(-3,3,-3,3)
-plt.axis(ax_lims)
-plt.subplot(211)
+plt.figure(figsize=(8,4), frameon=True)
 plt.title("Logistic Regression with best C: "+str(cs[ind]))
 line1, = plt.plot(errorTrain_l, label="Train Err", linestyle='-', color='blue')
 line2, = plt.plot(errorValidation_l, label="Validation Err", linestyle='-', color='green')
 legend = plt.legend(handles=[line1,line2], loc='upper right')
 ax = plt.gca().add_artist(legend)
-plt.show()
+#plt.show()
 plt.savefig('LR.png', dpi=300)
 plt.close()
 
@@ -262,16 +259,13 @@ for bandwidth in bws:
         best_err = va_err
         best_bw = bandwidth
 
-plt.figure(figsize=(8,8), frameon=True)
-ax_lims=(-3,3,-3,3)
-plt.axis(ax_lims)
-plt.subplot(211)
+plt.figure(figsize=(8,4), frameon=True)
 plt.title("Naive Bayes with best Bandwidth: "+str(best_bw))
 line1, = plt.plot(bws,errorTrain_b, label="Train Err", linestyle='-', color='blue')
 line2, = plt.plot(bws,errorValidation_b, label="Validation Err", linestyle='-', color='green')
 legend = plt.legend(handles=[line1,line2], loc='lower right')
 ax = plt.gca().add_artist(legend)
-plt.show()
+#plt.show()
 plt.savefig('NB.png', dpi=300)
 plt.close()
    
@@ -282,29 +276,32 @@ print("Best Bandwidth Found "+str(best_bw)+" with Error of",error)
 pred_logistic = reg.predict(X_finaltest)
 pred_gaussian = gaus.predict(X_finaltest)
 
+print("McNemar Test")
 t_p_l = testMc(pred_bayes,pred_logistic,Y_finaltest)
-print("Mc test For NB vs LR:",round(t_p_l,2))
+print("NB vs LR:",round(t_p_l,2))
 t_l_g = testMc(pred_logistic,pred_gaussian,Y_finaltest)
-print("Mc test For LR vs GS:",round(t_l_g,2))
+print("LR vs GS:",round(t_l_g,2))
 t_g_p = testMc(pred_gaussian,pred_bayes,Y_finaltest)
-print("Mc test For GS vs NB:",round(t_g_p,2))
+print("GS vs NB:",round(t_g_p,2))
 
+print("True Error")
 t_err_lg = np.mean(pred_logistic - Y_finaltest)**2
-print("True Error LR: ",round(t_err_lg,5)) 
+print("LR:",round(t_err_lg,5)) 
 t_err_gs = np.mean(pred_gaussian - Y_finaltest)**2
-print("True Error GS: ",round(t_err_gs,5)) 
+print("GS:",round(t_err_gs,5)) 
 t_err_nb = np.mean(pred_bayes - Y_finaltest)**2
-print("True Error NB: ",'%f' % round(t_err_nb,9))
+print("NB:",'%f' % round(t_err_nb,9))
 
 size = len(Y_finaltest)
 
-aprox_NT_l = aproxNormalTest(size, reg.score(X_finaltest,Y_finaltest))
+aprox_NT_l = aproxNormalTest(size , reg.score(X_finaltest,Y_finaltest))
 dev_l = calcDeviation(t_err_lg,size)
 aprox_NT_g = aproxNormalTest(size, gaus.score(X_finaltest,Y_finaltest))
 dev_g = calcDeviation(t_err_gs,size)
-aprox_NT_b = aproxNormalTest(size, accuracy_score(pred_bayes, Y_finaltest))
+aprox_NT_b = aproxNormalTest(size,  accuracy_score(pred_bayes, Y_finaltest))
 dev_b = calcDeviation(t_err_nb,size)
 
-print("Aprox Normal Distr LR: "+str(round(aprox_NT_l,2))+" ± "+str(round(dev_l,3)))
-print("Aprox Normal Distr GS: "+str(round(aprox_NT_g,2))+" ± "+str(round(dev_g,3)))
-print("Aprox Normal Distr NB: "+str(round(aprox_NT_b,2))+" ± "+str(round(dev_b,3)))
+print("Aprox Normal Test")
+print("LR: "+str(round(aprox_NT_l,2))+" ± "+str(round(dev_l,3)))
+print("GS: "+str(round(aprox_NT_g,2))+" ± "+str(round(dev_g,3)))
+print("NB: "+str(round(aprox_NT_b,2))+" ± "+str(round(dev_b,3)))

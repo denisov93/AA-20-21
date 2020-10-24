@@ -30,13 +30,15 @@ R6: The C parameter is a regularization value, smaller C values will cause bigge
 
 
 Q7: Explain how you determined the best bandwidth and C parameters for your classifier and the Logistic Regression classifier. You may include a relevant piece of your code if this helps you explain.
-R7: We loop values for "bandwidth" from 0.02 to 0.6 with a step of 0.02 and "C" from 1e-3 through 1e-12, the objective is to obtain the validation with least error observed
+R7: We loop values for "bandwidth" from 0.02 to 0.6 with a step of 0.02 and "C" from 1e-3 through 1e-12, the objective is to obtain the validation with least error observed.
 
 
 Q8: Explain how you obtained the best hypothesis for each classifier after optimizing all parameters.
-R8: We trained and fitted the data then we compared the 
+R8: We compared using approximate normal test and McNemar's test with 95% confidence, the approximate normal test results show errors and their deviation where Naïve Bayes was prone to less validation errors then other estimators, McNemar Test show there was a difference between all estimators.
 
 
 Q9: Show the best parameters, the estimate of the true error for each hypothesis you obtained (your classifier and the two provided by the library), the ranges in the expected number of errors given by the approximate normal test, the McNemar test values, and discuss what you can conclude from this.
-R9:
+R9: C: 0.1, Bandwidth: 0.18, Logistic Regression error: 0.11, Gaussian error: 0.12998, Naïve Bayes error: 0.08453, Logistic Regression true error: 0.00312, Gaussian true error: 0.0055, Naïve Bayes true error: 0.000023, Aprox Normal Test or LR: 138.0 ± 3.868, GS: 163.0 ± 5.133, NB: 106.0 ± 0.332, McNemar Tests: NB vs LR: 10.45, LR vs GS: 10.47, GS vs NB: 30.45,
+Overall by the results obtained from the data we conclude that Gaussian had the most errors, the logistic regression had simmilar errors then Gaussian, Naïve Bayes was the best estimator for the provided data with the lowest true error, McNemar scores had values bigger then 3.84 which means all estimators producing significantly different values thus not having the same performace, biggest difference was by GS vs NB with 30.45.
+
 
