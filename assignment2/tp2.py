@@ -107,3 +107,16 @@ Eu diria um número não superior a 4 ou 5 é tipicamente o usado.
 É preciso experimentar. 
 O trabalho tem essa componente de experimentação.
 '''
+
+#Best Features
+
+
+#Clustering
+
+'''
+Posteriormente ao clustering, 
+também poderemos chegar à conclusão de 
+qual o melhor grupo candidato de features.
+'''
+
+#Clustering Best Group of Features
