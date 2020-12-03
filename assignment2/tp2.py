@@ -29,3 +29,19 @@ reaching some conclusion about the best way of grouping these images.
 import tp2_aux as aux 
 #
 
+imgMatrix = aux.images_as_matrix(563)
+
+'''
+From this matrix, you will extract features using three different methods:
+
+Principal Component Analysis (PCA)
+    >Use the PCA class from the sklearn.decomposition module.
+t-Distributed Stochastic Neighbor Embedding (t-SNE)
+    >Use the TSNE class from the sklearn.manifold module. When creating an object of this class, use the method='exact' argument, for otherwise the TSNE constructor will use a faster, approximate, computation which allows for at most 3 components.
+Isometric mapping with Isomap
+    >Use the Isomap class from the sklearn.manifold module.
+    
+With each method, extract six features from the data set, for a total of 18 features.
+'''
+
+
