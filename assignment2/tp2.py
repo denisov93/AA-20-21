@@ -27,9 +27,13 @@ reaching some conclusion about the best way of grouping these images.
 
 #imports
 import tp2_aux as aux 
+import numpy as np
 #
 
 imgMatrix = aux.images_as_matrix(563)
+
+input_data = "labels.txt"
+cellCycleLabels = np.loadtxt(input_data, delimiter=",")
 
 '''
 From this matrix, you will extract features using three different methods:
@@ -43,5 +47,7 @@ Isometric mapping with Isomap
     
 With each method, extract six features from the data set, for a total of 18 features.
 '''
+print(cellCycleLabels)
+
 
 
