@@ -82,3 +82,22 @@ X_std_isom = isom.fit_transform(X_std)
 #print(X_std_isom.shape) #output check
 #print(X_std_isom) #output check
 ###End of Feature Extraction
+
+'''
+Nem há um valor fixo para o número de features. 
+Terá que ser determinado pelas experiências. 
+Por ex: se o valor de F que vem que f_classf nos der 
+valores de por ex: 60, 40, 2, 0.5, 0.25, 0.002 
+isto significa que o número de features
+a considerar neste critério devem ser 2. 
+Esta é uma pista que deve ser confirmada com gráficos 
+em que os eixos são pares de features, 
+mostrando quão bom ou não é o poder discriminate delas para separar as classes.
+
+É a partir das 18 que se extraem as melhores.  
+Mas é improvável que venhamos a usar as 18 
+por que nem todas são realmente discriminates. 
+Eu diria um número não superior a 4 ou 5 é tipicamente o usado. 
+É preciso experimentar. 
+O trabalho tem essa componente de experimentação.
+'''
