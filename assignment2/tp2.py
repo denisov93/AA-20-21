@@ -31,8 +31,9 @@ import numpy as np
 #
 
 DECOMP_NUM_FEATURES = 6
+NUM_IMAGES = 563
 
-imgMatrix = aux.images_as_matrix(563)
+imgMatrix = aux.images_as_matrix(NUM_IMAGES)
 
 input_data = "labels.txt"
 cell_cycle_labels = np.loadtxt(input_data, delimiter=",")
