@@ -63,22 +63,26 @@ import sklearn.manifold as manifold
 import sklearn.preprocessing as preprocess
 stand_scale =  preprocess.StandardScaler()
 X_std = stand_scale.fit_transform(imgMatrix)
+print('[Feature Extraction] Extracting '+str(DECOMP_NUM_FEATURES)+' features for each method.')
 
 #PCA Feature Extraction
 pca = decomp.PCA(n_components=DECOMP_NUM_FEATURES)
 X_std_pca = pca.fit_transform(X_std)
+print('[Feature Extraction] PCA Complete')
 #print(X_std_pca.shape) #output check
 #print(X_std_pca) #output check
 
 #t-SNE Feature Extraction
 tsne = manifold.TSNE(n_components=DECOMP_NUM_FEATURES, method='exact')
 X_std_tsne = tsne.fit_transform(X_std)
+print('[Feature Extraction] t-SNE Complete')
 #print(X_std_tsne.shape) #output check
 #print(X_std_tsne) #output check
 
 #Isometric Feature Extraction
 isom = manifold.Isomap(n_components=DECOMP_NUM_FEATURES)
 X_std_isom = isom.fit_transform(X_std)
+print('[Feature Extraction] Isometric Complete')
 #print(X_std_isom.shape) #output check
 #print(X_std_isom) #output check
 ###End of Feature Extraction
