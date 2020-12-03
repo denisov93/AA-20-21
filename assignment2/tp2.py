@@ -84,6 +84,8 @@ X_std_isom = isom.fit_transform(X_std)
 ###End of Feature Extraction
 
 '''
+(Selecting Best Features after extraction)
+
 Nem há um valor fixo para o número de features. 
 Terá que ser determinado pelas experiências. 
 Por ex: se o valor de F que vem que f_classf nos der 
