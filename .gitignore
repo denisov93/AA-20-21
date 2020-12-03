@@ -1,1 +1,4 @@
 assignment1/__pycache__/TP1_aux.cpython-38.pyc
+assignment2/*.png
+assignment2/images/*
+assignment2/labels.txt
