@@ -154,6 +154,7 @@ X_features = X_features.reshape(DECOMP_NUM_FEATURES*3,NUM_IMAGES).T
 print('\n',X_features.shape,'\n')
 print(X_features[0])
 
+'''
 i=0
 for i in range (6):
     if(X_features[0][i] == X_pca[0][i]):
@@ -162,6 +163,14 @@ for i in range (6):
         print("ISOM Checks Out!")
     if(X_features[0][i+12] == X_tsne[0][i]):
         print("TSNE Checks Out!")
+'''
+labelledCells = cell_cycle_labels[cell_cycle_labels[:,1] != 0,:]
+
+labelledFeatures = X_features[cell_cycle_labels[:,1] != 0,:]
+
+
+
+
 
 
 print('[End of Execution]')
