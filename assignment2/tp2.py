@@ -29,7 +29,6 @@ reaching some conclusion about the best way of grouping these images.
 import tp2_aux as aux 
 import numpy as np
 from collections import Counter
-#
 
 DECOMP_NUM_FEATURES = 6
 NUM_IMAGES = 563
@@ -90,19 +89,25 @@ import sklearn.manifold as manifold
 #PreProcess - Standard Scale
 import sklearn.preprocessing as preprocess
 stand_scale =  preprocess.StandardScaler() 
-'''Question: Should we standarize the data?'''
-std_answer = False
+'''Question: Should we standarize the data? Ans: No'''
 #In unsupervised learning, we often need to be careful about
 #how we transform the data because the shape of its distribution 
 #and the distances between the points may be important.
-if(std_answer):
-    X = stand_scale.fit_transform(imgMatrix)
-else:
-    X = imgMatrix
+X = imgMatrix
+allowFeatureProcessing = True
 
-allowDecomposition = True
+X_pca = []
+X_isom = []
+X_tsne = []
 
-if(allowDecomposition):
+X_pca = aux.loadFeatureFile('pca')
+X_isom = aux.loadFeatureFile('isom')
+X_tsne = aux.loadFeatureFile('tsne')
+
+if(len(X_pca)>0 and len(X_isom)>0 and len(X_tsne)>0):
+    allowFeatureProcessing = False
+
+if(allowFeatureProcessing):
     print('[Feature Extraction]\nExtracting '+str(DECOMP_NUM_FEATURES)+' features for each method.')
     
     #PCA Feature Extraction
@@ -125,9 +130,17 @@ if(allowDecomposition):
     print('(3/3) t-SNE Complete')
     #print(X_tsne.shape) #output check
     #print(X_tsne) #output check
+
+    aux.saveFeatures(X_pca,'pca')
+    aux.saveFeatures(X_isom,'isom')
+    aux.saveFeatures(X_tsne,'tsne')
     
     print('[End of Feature Extraction]')
 ###End of Feature Extraction
+
+print(X_pca.shape)
+print(X_isom.shape)
+print(X_tsne.shape)
 
 print('[End of Execution]')
 

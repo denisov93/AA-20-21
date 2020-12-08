@@ -7,10 +7,29 @@ import numpy as np
 from skimage.io import imread
 import matplotlib.pyplot as plt
 
+#imports for saving/loading
+import json, codecs, os.path
+from os import path
+#
+
 #constants
 FIGSIZE = (7,7)
 
 # function def
+def saveFeatures(data,name):
+    file = name + '.json'
+    dataList = data.tolist()
+    json.dump(dataList, codecs.open(file, 'w', encoding='utf-8'), separators=(',', ':'), sort_keys=True, indent=4)
+        
+def loadFeatureFile(name):
+    file = name + '.json'
+    data = []
+    if(path.exists(file)):
+        loadfile = codecs.open(file, 'r', encoding='utf-8').read()
+        json_raw = json.loads(loadfile)
+        data = np.array(json_raw)        
+    return data
+
 def plot_iris(X,y,file_name="plot.png"):
     plt.figure(figsize=FIGSIZE)
     plt.plot(X[y==0,0], X[y==0,1],'o', markersize=7, color='blue', alpha=0.5)
