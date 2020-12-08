@@ -32,9 +32,12 @@ def loadFeatureFile(name):
 
 def plot_iris(X,y,file_name="plot.png"):
     plt.figure(figsize=FIGSIZE)
-    plt.plot(X[y==0,0], X[y==0,1],'o', markersize=7, color='blue', alpha=0.5)
+    plt.plot(X[y==0,0], X[y==0,1],'o', markersize=7, color='yellow', alpha=0.5)
     plt.plot(X[y==1,0], X[y==1,1],'o', markersize=7, color='red', alpha=0.5)
     plt.plot(X[y==2,0], X[y==2,1],'o', markersize=7, color='green', alpha=0.5)
+    plt.plot(X[y==3,0], X[y==3,1],'o', markersize=7, color='blue', alpha=0.5)
+    plt.plot(X[y==4,0], X[y==4,1],'o', markersize=7, color='pink', alpha=0.5)
+    plt.plot(X[y==5,0], X[y==5,1],'o', markersize=7, color='orange', alpha=0.5)
     plt.gca().set_aspect('equal',adjustable='box')
     plt.savefig(file_name, dpi=200, bbox_inches='tight')
 

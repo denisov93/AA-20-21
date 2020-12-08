@@ -99,6 +99,7 @@ allowFeatureProcessing = True
 X_pca = []
 X_isom = []
 X_tsne = []
+X_features = []
 
 X_pca = aux.loadFeatureFile('pca')
 X_isom = aux.loadFeatureFile('isom')
@@ -138,21 +139,10 @@ if(allowFeatureProcessing):
     print('[End of Feature Extraction]')
 ###End of Feature Extraction
 
-#X_pca = [['1A1','1A2','1A3'],['1B1','1B2','1B3'],['1C1','1C2','1C3']]
-#X_isom = [['2A1','2A2','2A3'],['2B1','2B2','2B3'],['2C1','2C2','2C3']]
-#X_tsne = [['3A1','3A2','3A3'],['3B1','3B2','3B3'],['3C1','3C2','3C3']]
-
-print(X_pca[0])
-print(X_isom[0])
-print(X_tsne[0])
-
-X_features = []
 X_features = np.append(X_features,X_pca.T)
 X_features = np.append(X_features,X_isom.T)
 X_features = np.append(X_features,X_tsne.T)
 X_features = X_features.reshape(DECOMP_NUM_FEATURES*3,NUM_IMAGES).T
-print('\n',X_features.shape,'\n')
-print(X_features[0])
 
 '''
 i=0
@@ -165,11 +155,36 @@ for i in range (6):
         print("TSNE Checks Out!")
 '''
 labelledCells = cell_cycle_labels[cell_cycle_labels[:,1] != 0,:]
+y=np.array(labelledCells[:,1])
 
+print(y)
 labelledFeatures = X_features[cell_cycle_labels[:,1] != 0,:]
+print(labelledFeatures.shape)
+
+from sklearn.feature_selection import SelectKBest
+from sklearn.feature_selection import f_classif
+from sklearn.multiclass import OneVsRestClassifier
+from sklearn.svm import SVC
 
 
+sample_ANOVA = f_classif(labelledFeatures, y)
+print("ANOVA Classification")
+print(sample_ANOVA)
 
+ovr = OneVsRestClassifier(SVC(kernel='rbf', gamma=0.7, C=10)).fit(labelledFeatures, y)
+prediction = ovr.predict(sample_ANOVA)
+print("OneVsRestClassifier")
+print(prediction)
+
+# Create an SelectKBest object to select features with two best ANOVA F-Values
+print("ANOVA SelectKBest Features")
+fvalue_selector = SelectKBest(f_classif, k=5)
+# Apply the SelectKBest object to the features and target
+# Selecionado as que tem menos probabilidade e maior F1-score (probabilidade de independencia dos dados ser maior)
+X_kbest = fvalue_selector.fit_transform(labelledFeatures, y)
+
+#plot
+aux.plot_iris(X_kbest, y)
 
 
 
