@@ -5,6 +5,19 @@ Auxiliary functions for assignment 2
 """
 import numpy as np
 from skimage.io import imread
+import matplotlib.pyplot as plt
+
+#constants
+FIGSIZE = (7,7)
+
+# function def
+def plot_iris(X,y,file_name="plot.png"):
+    plt.figure(figsize=FIGSIZE)
+    plt.plot(X[y==0,0], X[y==0,1],'o', markersize=7, color='blue', alpha=0.5)
+    plt.plot(X[y==1,0], X[y==1,1],'o', markersize=7, color='red', alpha=0.5)
+    plt.plot(X[y==2,0], X[y==2,1],'o', markersize=7, color='green', alpha=0.5)
+    plt.gca().set_aspect('equal',adjustable='box')
+    plt.savefig(file_name, dpi=200, bbox_inches='tight')
 
 def images_as_matrix(N=563):
     """
