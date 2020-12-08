@@ -138,9 +138,31 @@ if(allowFeatureProcessing):
     print('[End of Feature Extraction]')
 ###End of Feature Extraction
 
-print(X_pca.shape)
-print(X_isom.shape)
-print(X_tsne.shape)
+#X_pca = [['1A1','1A2','1A3'],['1B1','1B2','1B3'],['1C1','1C2','1C3']]
+#X_isom = [['2A1','2A2','2A3'],['2B1','2B2','2B3'],['2C1','2C2','2C3']]
+#X_tsne = [['3A1','3A2','3A3'],['3B1','3B2','3B3'],['3C1','3C2','3C3']]
+
+print(X_pca[0])
+print(X_isom[0])
+print(X_tsne[0])
+
+X_features = []
+X_features = np.append(X_features,X_pca.T)
+X_features = np.append(X_features,X_isom.T)
+X_features = np.append(X_features,X_tsne.T)
+X_features = X_features.reshape(DECOMP_NUM_FEATURES*3,NUM_IMAGES).T
+print('\n',X_features.shape,'\n')
+print(X_features[0])
+
+i=0
+for i in range (6):
+    if(X_features[0][i] == X_pca[0][i]):
+        print("PCA Checks Out!")
+    if(X_features[0][i+6] == X_isom[0][i]):
+        print("ISOM Checks Out!")
+    if(X_features[0][i+12] == X_tsne[0][i]):
+        print("TSNE Checks Out!")
+
 
 print('[End of Execution]')
 
@@ -157,8 +179,8 @@ Esta é uma pista que deve ser confirmada com gráficos
 em que os eixos são pares de features, 
 mostrando quão bom ou não é o poder discriminate delas para separar as classes.
 
-É a partir das 16 que se extraem as melhores.  
-Mas é improvável que venhamos a usar as 16 
+É a partir das 18 que se extraem as melhores.  
+Mas é improvável que venhamos a usar as 18 
 por que nem todas são realmente discriminates. 
 Eu diria um número não superior a 4 ou 5 é tipicamente o usado. 
 É preciso experimentar. 
