@@ -3,3 +3,6 @@ assignment2/*.png
 assignment2/labels.txt
 assignment2/example_labels.html
 assignment2/__pycache__/tp2_aux.cpython-38.pyc
+assignment2/tsne.json
+assignment2/isom.json
+assignment2/pca.json
