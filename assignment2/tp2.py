@@ -185,22 +185,51 @@ fvalue_selector = SelectKBest(f_classif, k=5)
 X_kbest = fvalue_selector.fit_transform(labelledFeatures, y)
 
 #plot
-aux.plot_iris(X_kbest, y)
+#aux.plot_iris(X_kbest, y)
+
+from sklearn.neighbors import KNeighborsClassifier
+
+
+ones = np.ones(cell_cycle_labels[:,1].shape[0])
+dist,index = KNeighborsClassifier(n_neighbors=5).fit(X_features, ones).kneighbors()
+classifff = np.amax(dist,1)
+classifff[::-1].sort()
+
+
+
+
+aux.plot_elbow(classifff,index[:,1],file_name="plot.png")
+
+
 
 from sklearn.cluster import DBSCAN
-dbscan=DBSCAN(eps=800,min_samples=5)
+dbscan=DBSCAN(eps=2400,min_samples=5)
 model=dbscan.fit(X_features)
-labelsdb=model.labels_
+core_samples_mask = np.zeros_like(model.labels_, dtype=bool)
+core_samples_mask[model.core_sample_indices_] = True
+labelsdb = model.labels_
+
+
+dbscan2=DBSCAN(eps=1550,min_samples=5)
+m2 = dbscan2.fit_predict(X_features)
+#print("-------------->",m2)
+
 
 kmeans = KMeans(n_clusters=3).fit(X_features)
 labelskm = kmeans.predict(X_features)
 centroids = kmeans.cluster_centers_
 
-aux.plot_centroids(X_features, cell_cycle_labels[:,1], centroids,file_name='all.png')
+#aux.plot_centroids(X_features, cell_cycle_labels[:,1], centroids,file_name='all.png')
 
-aux.plot_centroids(X_features,labelskm, centroids, file_name='centroid.png')
+#aux.plot_centroids(X_features,labelskm, centroids, file_name='centroid.png')
 
-print(labelskm)
+aux.plot_db(X_features,labelsdb,3,core_samples_mask)
+
+#aux.plot_iris(X_features,m2,file_name='trying.png')
+
+print(labelsdb)
+
+#aux.report_clusters(cell_cycle_labels[:,0], labelsdb ,"meufilemagnifico.html")
 
 
 print('[End of Execution]')

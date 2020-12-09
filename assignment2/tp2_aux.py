@@ -30,6 +30,12 @@ def loadFeatureFile(name):
         data = np.array(json_raw)        
     return data
 
+def plot_elbow(X,y,file_name="plot.png"):
+    plt.figure(figsize=FIGSIZE)
+    plt.plot( X, color='red', label='Elbow')
+    plt.show()
+    
+    
 def plot_iris(X,y,file_name="plot.png"):
     plt.figure(figsize=FIGSIZE)
     plt.plot(X[y==0,0], X[y==0,1],'o', markersize=7, color='grey', alpha=0.5)
@@ -49,6 +55,32 @@ def plot_centroids(X,y,centroids,file_name="centroidplot.png"):
     color='k',s=100, linewidths=3)
     plt.gca().set_aspect('equal',adjustable='box')
     plt.savefig(file_name, dpi=200, bbox_inches='tight')
+
+
+def plot_db(X,labels,n_clusters_,core_samples_mask):
+    # Black removed and is used for noise instead.
+    plt.figure(figsize=FIGSIZE)
+    unique_labels = set(labels)
+    colors = [plt.cm.Spectral(each)
+              for each in np.linspace(0, 1, len(unique_labels))]
+    for k, col in zip(unique_labels, colors):
+        if k == -1:
+            # Black used for noise.
+            col = [0, 0, 0, 1]
+    
+        class_member_mask = (labels == k)
+    
+        xy = X[class_member_mask & core_samples_mask]
+        plt.plot(xy[:, 0], xy[:, 1], 'o', markerfacecolor=tuple(col),
+                 markeredgecolor='k', markersize=14)
+    
+        xy = X[class_member_mask & ~core_samples_mask]
+        plt.plot(xy[:, 0], xy[:, 1], 'o', markerfacecolor=tuple(col),
+                 markeredgecolor='k', markersize=6)
+    
+    plt.title('Estimated number of clusters: %d' % n_clusters_)
+    plt.show()
+
 
 def images_as_matrix(N=563):
     """
