@@ -165,7 +165,8 @@ from sklearn.feature_selection import SelectKBest
 from sklearn.feature_selection import f_classif
 from sklearn.multiclass import OneVsRestClassifier
 from sklearn.svm import SVC
-
+from sklearn.cluster import KMeans
+import matplotlib.pyplot as plt
 
 sample_ANOVA = f_classif(labelledFeatures, y)
 print("ANOVA Classification")
@@ -184,8 +185,27 @@ fvalue_selector = SelectKBest(f_classif, k=5)
 X_kbest = fvalue_selector.fit_transform(labelledFeatures, y)
 
 #plot
-aux.plot_iris(X_kbest, y)
+#aux.plot_iris(X_kbest, y)
+'''
+kmeans = KMeans(n_clusters=4).fit(labelledFeatures)
+labels = kmeans.predict(X_features)
+centroids = kmeans.cluster_centers_
 
+plt.scatter(centroids[:, 0], centroids[:, 1], marker='o',
+ color='k',s=200, linewidths=5)
+plt.scatter(centroids[:, 0], centroids[:, 1], marker='o',
+ color='w',s=150, linewidths=2)
+plt.savefig('L17-rosa-plot-cs-'+str(6)+'.png',
+ dpi=200,bbox_inches='tight')
+'''
+from sklearn.cluster import DBSCAN
+dbscan=DBSCAN(eps=2000,min_samples=5)
+
+model=dbscan.fit(X_features)
+
+labels=model.labels_
+
+print(labels)
 
 
 print('[End of Execution]')
