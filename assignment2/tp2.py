@@ -168,44 +168,39 @@ from sklearn.svm import SVC
 from sklearn.cluster import KMeans
 import matplotlib.pyplot as plt
 
-sample_ANOVA = f_classif(labelledFeatures, y)
-print("ANOVA Classification")
-print(sample_ANOVA)
+sample = f_classif(labelledFeatures, y)
+print("Classification")
+print(sample)
 
 ovr = OneVsRestClassifier(SVC(kernel='rbf', gamma=0.7, C=10)).fit(labelledFeatures, y)
-prediction = ovr.predict(sample_ANOVA)
+prediction = ovr.predict(sample)
 print("OneVsRestClassifier")
 print(prediction)
 
-# Create an SelectKBest object to select features with two best ANOVA F-Values
-print("ANOVA SelectKBest Features")
+# Create an SelectKBest object to select features with two best F-Values
+print("SelectKBest Features")
 fvalue_selector = SelectKBest(f_classif, k=5)
 # Apply the SelectKBest object to the features and target
 # Selecionado as que tem menos probabilidade e maior F1-score (probabilidade de independencia dos dados ser maior)
 X_kbest = fvalue_selector.fit_transform(labelledFeatures, y)
 
 #plot
-#aux.plot_iris(X_kbest, y)
-'''
-kmeans = KMeans(n_clusters=4).fit(labelledFeatures)
-labels = kmeans.predict(X_features)
+aux.plot_iris(X_kbest, y)
+
+from sklearn.cluster import DBSCAN
+dbscan=DBSCAN(eps=800,min_samples=5)
+model=dbscan.fit(X_features)
+labelsdb=model.labels_
+
+kmeans = KMeans(n_clusters=3).fit(X_features)
+labelskm = kmeans.predict(X_features)
 centroids = kmeans.cluster_centers_
 
-plt.scatter(centroids[:, 0], centroids[:, 1], marker='o',
- color='k',s=200, linewidths=5)
-plt.scatter(centroids[:, 0], centroids[:, 1], marker='o',
- color='w',s=150, linewidths=2)
-plt.savefig('L17-rosa-plot-cs-'+str(6)+'.png',
- dpi=200,bbox_inches='tight')
-'''
-from sklearn.cluster import DBSCAN
-dbscan=DBSCAN(eps=2000,min_samples=5)
+aux.plot_centroids(X_features, cell_cycle_labels[:,1], centroids,file_name='all.png')
 
-model=dbscan.fit(X_features)
+aux.plot_centroids(X_features,labelskm, centroids, file_name='centroid.png')
 
-labels=model.labels_
-
-print(labels)
+print(labelskm)
 
 
 print('[End of Execution]')
