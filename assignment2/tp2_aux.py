@@ -6,6 +6,7 @@ Auxiliary functions for assignment 2
 import numpy as np
 from skimage.io import imread
 import matplotlib.pyplot as plt
+import matplotlib.patches as mpatches
 
 #imports for saving/loading
 import json, codecs, os.path
@@ -30,34 +31,47 @@ def loadFeatureFile(name):
         data = np.array(json_raw)        
     return data
 
-def plot_elbow(X,y,file_name="plot.png"):
+def plot_elbow(X,y,file_name="elbowplot.png"):
     plt.figure(figsize=FIGSIZE)
-    plt.plot( X, color='red', label='Elbow')
-    plt.show()
-    
+    plt.title('Elbow')
+    f1, = plt.plot(X, color='red', label='Elbow')
+    plt.legend(handles=[f1])
+    plt.savefig(file_name, dpi=200, bbox_inches='tight')
     
 def plot_iris(X,y,file_name="plot.png"):
     plt.figure(figsize=FIGSIZE)
-    plt.plot(X[y==0,0], X[y==0,1],'o', markersize=7, color='grey', alpha=0.5)
-    plt.plot(X[y==1,0], X[y==1,1],'o', markersize=7, color='orange', alpha=0.5)
-    plt.plot(X[y==2,0], X[y==2,1],'o', markersize=7, color='red', alpha=0.5)
-    plt.plot(X[y==3,0], X[y==3,1],'o', markersize=7, color='blue', alpha=0.5)
+    plt.plot(X[y==0,0], X[y==0,1],'o', markersize=7, color='grey', alpha=0.7)
+    plt.plot(X[y==1,0], X[y==1,1],'o', markersize=7, color='orange', alpha=0.7)
+    plt.plot(X[y==2,0], X[y==2,1],'o', markersize=7, color='red', alpha=0.7)
+    plt.plot(X[y==3,0], X[y==3,1],'o', markersize=7, color='blue', alpha=0.7)
+    plt.gca().set_aspect('equal',adjustable='box')
+    plt.savefig(file_name, dpi=200, bbox_inches='tight')
+    
+def plot_label_classification(X,y,file_name="labelclassify.png"):
+    plt.figure(figsize=FIGSIZE)
+    plt.title('%d labels' % len(X))
+    f1, = plt.plot(X[y==0,0], X[y==0,1],'o', markersize=7, color='grey', alpha=0.4, label='Unclassified')
+    f2, = plt.plot(X[y==1,0], X[y==1,1],'o', markersize=7, color='orange', alpha=0.5, label='Phase 1')
+    f3, = plt.plot(X[y==2,0], X[y==2,1],'o', markersize=7, color='red', alpha=0.5, label='Phase 2')
+    f4, = plt.plot(X[y==3,0], X[y==3,1],'o', markersize=7, color='blue', alpha=0.5, label='Phase 3')
+    plt.legend(handles=[f1,f2,f3,f4])
     plt.gca().set_aspect('equal',adjustable='box')
     plt.savefig(file_name, dpi=200, bbox_inches='tight')
     
 def plot_centroids(X,y,centroids,file_name="centroidplot.png"):
     plt.figure(figsize=FIGSIZE)
-    plt.plot(X[y==0,0], X[y==0,1],'o', markersize=7, color='orange', alpha=0.5)
-    plt.plot(X[y==1,0], X[y==1,1],'o', markersize=7, color='red', alpha=0.5)
-    plt.plot(X[y==2,0], X[y==2,1],'o', markersize=7, color='blue', alpha=0.5)
-    plt.plot(X[y==3,0], X[y==3,1],'o', markersize=7, color='green', alpha=0.5)
+    plt.title('Clusters & Centroids')
+    plt.plot(X[y==0,0], X[y==0,1],'o', markersize=7, color='blue', alpha=0.4)
+    plt.plot(X[y==1,0], X[y==1,1],'o', markersize=7, color='green', alpha=0.7)
+    plt.plot(X[y==2,0], X[y==2,1],'o', markersize=7, color='red', alpha=0.7)
+    plt.plot(X[y==3,0], X[y==3,1],'o', markersize=7, color='orange', alpha=0.7)
     plt.scatter(centroids[:, 0], centroids[:, 1], marker='x',
     color='k',s=100, linewidths=3)
     plt.gca().set_aspect('equal',adjustable='box')
     plt.savefig(file_name, dpi=200, bbox_inches='tight')
 
 
-def plot_db(X,labels,n_clusters_,core_samples_mask):
+def plot_db(X,labels,n_clusters):
     # Black removed and is used for noise instead.
     plt.figure(figsize=FIGSIZE)
     unique_labels = set(labels)
@@ -70,17 +84,17 @@ def plot_db(X,labels,n_clusters_,core_samples_mask):
     
         class_member_mask = (labels == k)
     
-        xy = X[class_member_mask & core_samples_mask]
-        plt.plot(xy[:, 0], xy[:, 1], 'o', markerfacecolor=tuple(col),
-                 markeredgecolor='k', markersize=14)
+        if k == -1: #draw noise
+            xy = X[class_member_mask]
+            plt.plot(xy[:, 0], xy[:, 1], 'o', markerfacecolor=tuple(col),
+                     markeredgecolor='k', markersize=7, alpha=0.33)
+        else: #draw class
+            xy = X[class_member_mask]
+            plt.plot(xy[:, 0], xy[:, 1], 'o', markerfacecolor=tuple(col),
+                     markeredgecolor='k', markersize=10, alpha=0.77)
     
-        xy = X[class_member_mask & ~core_samples_mask]
-        plt.plot(xy[:, 0], xy[:, 1], 'o', markerfacecolor=tuple(col),
-                 markeredgecolor='k', markersize=6)
-    
-    plt.title('Estimated number of clusters: %d' % n_clusters_)
+    plt.title('Estimated number of clusters: %d' % n_clusters)
     plt.show()
-
 
 def images_as_matrix(N=563):
     """
