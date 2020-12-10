@@ -195,6 +195,7 @@ dist,index = KNeighborsClassifier(n_neighbors=5).fit(X_features, ones).kneighbor
 classifff = np.amax(dist,1)
 classifff[::-1].sort()
 
+deriv = [ (classifff[i]-classifff[i-1])/(1/float(classifff.shape[0]) )  for i in range(1,classifff.shape[0])]
 
 
 
