@@ -78,7 +78,6 @@ import sklearn.manifold as manifold
 #PreProcess - Standard Scale
 import sklearn.preprocessing as preprocess
 stand_scale =  preprocess.StandardScaler() 
-'''Question: Should we standarize the data? Ans: No'''
 #In unsupervised learning, we often need to be careful about
 #how we transform the data because the shape of its distribution 
 #and the distances between the points may be important.
@@ -102,21 +101,24 @@ if(allowFeatureProcessing):
     
     #PCA Feature Extraction
     pca = decomp.PCA(n_components=DECOMP_NUM_FEATURES)
-    X_pca = pca.fit_transform(X)
+    X_std_pca = stand_scale.fit_transform(X)
+    X_pca = pca.fit_transform(X_std_pca)
     print('(1/3) PCA Complete')
     #print(X_pca.shape) #output check
     #print(X_pca) #output check
     
     #Isometric Feature Extraction
     isom = manifold.Isomap(n_components=DECOMP_NUM_FEATURES)
-    X_isom = isom.fit_transform(X)
+    X_std_isom = stand_scale.fit_transform(X)
+    X_isom = isom.fit_transform(X_std_isom)
     print('(2/3) Isometric Complete')
     #print(X_isom.shape) #output check
     #print(X_isom) #output check
     
     #t-SNE Feature Extraction
     tsne = manifold.TSNE(n_components=DECOMP_NUM_FEATURES, method='exact')
-    X_tsne = tsne.fit_transform(X)
+    X_std_tsne = stand_scale.fit_transform(X)
+    X_tsne = tsne.fit_transform(X_std_tsne)
     print('(3/3) t-SNE Complete')
     #print(X_tsne.shape) #output check
     #print(X_tsne) #output check
@@ -157,17 +159,18 @@ import matplotlib.pyplot as plt
 
 sample = f_classif(labelledFeatures, y)
 print('ANOVA Classification [F-value,p-value]')
-pValues = np.array(sample).T
-print(pValues)
+ANOVAValues = np.array(sample).T
+print(ANOVAValues)
 
 nbestcounter = 0
 index = 0
 bestFeaturesIndex = []
-for nbestcounter in range(3):
-    for index in range(len(pValues)):
-        value = pValues[index][1]
-        if(value == pValues.min() and (index not in bestFeaturesIndex)):
-            pValues[index][1] = 1
+
+for nbestcounter in range(2):
+    for index in range(len(ANOVAValues)):
+        value = ANOVAValues[index][0]
+        if(value == ANOVAValues.max() and (index not in bestFeaturesIndex)):
+            ANOVAValues[index][0] = 9e-99
             bestFeaturesIndex.append(index)
 
 print('BestFeaturesIndex:',bestFeaturesIndex)
@@ -180,8 +183,8 @@ for nbestcounter in range(4):
 X_4features = np.array(X_4features).T
 
 print('X_4Features Shape:',X_4features.shape)
-print('X_4Features:',X_4features)
-print('X_Features:',X_features)
+#print('X_4Features:',X_4features)
+#print('X_Features:',X_features)
 
 ovr = OneVsRestClassifier(SVC(kernel='rbf', gamma=0.7, C=10)).fit(labelledFeatures, y)
 prediction = ovr.predict(sample)
@@ -206,30 +209,27 @@ dist,index = KNeighborsClassifier(n_neighbors=5).fit(X_4features, ones).kneighbo
 classifff = np.amax(dist,1)
 classifff[::-1].sort()
 
+deriv = [ (classifff[i]-classifff[i-1])/(1/float(classifff.shape[0]) )  for i in range(1,classifff.shape[0])]
+
+#aux.plot_elbow(classifff/classifff[0],index[:,1])
+
 aux.plot_elbow(classifff,index[:,1])
 
-
 from sklearn.cluster import DBSCAN
-dbscan=DBSCAN(eps=1300, min_samples=5)
-model=dbscan.fit(X_features)
-labelsdb = model.fit_predict(X_features)
+dbscan=DBSCAN(eps=10.1, min_samples=5)
+model=dbscan.fit(X_4features)
+labelsdb = model.fit_predict(X_4features)
+aux.DBSCAN_Report(X_4features,labelsdb,cell_cycle_labels[:,1])
 
-#dbscan2=DBSCAN(eps=2850,min_samples=5)
-#m2 = dbscan2.fit_predict(X_features)
-#print("-------------->",m2)
-
-
-kmeans = KMeans(n_clusters=3).fit(X_features)
-labelskm = kmeans.predict(X_features)
+kmeans = KMeans(n_clusters=3).fit(X_4features)
+labelskm = kmeans.predict(X_4features)
 centroids = kmeans.cluster_centers_
 
-aux.plot_label_classification(X_features, cell_cycle_labels[:,1])
+#aux.plot_label_classification(X_features, cell_cycle_labels[:,1])
 
-#aux.plot_centroids(X_features, labelskm, centroids, file_name='centroid.png')
+aux.plot_centroids(X_4features, labelskm, centroids, file_name='centroid.png')
 
-aux.plot_db(X_features,labelsdb,len(centroids))
-
-#aux.plot_iris(X_features,m2,file_name='trying.png')
+aux.plot_db(X_4features,labelsdb)
 
 aux.report_clusters(cell_cycle_labels[:,0], labelsdb ,"cluster_report.html")
 

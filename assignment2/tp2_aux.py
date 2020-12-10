@@ -5,6 +5,7 @@ Auxiliary functions for assignment 2
 """
 import numpy as np
 from skimage.io import imread
+from sklearn import metrics
 import matplotlib.pyplot as plt
 import matplotlib.patches as mpatches
 
@@ -71,7 +72,7 @@ def plot_centroids(X,y,centroids,file_name="centroidplot.png"):
     plt.savefig(file_name, dpi=200, bbox_inches='tight')
 
 
-def plot_db(X,labels,n_clusters):
+def plot_db(X,labels):
     # Black removed and is used for noise instead.
     plt.figure(figsize=FIGSIZE)
     unique_labels = set(labels)
@@ -93,7 +94,8 @@ def plot_db(X,labels,n_clusters):
             plt.plot(xy[:, 0], xy[:, 1], 'o', markerfacecolor=tuple(col),
                      markeredgecolor='k', markersize=10, alpha=0.77)
     
-    plt.title('Estimated number of clusters: %d' % n_clusters)
+    n_clusters_ = len(set(labels)) - (1 if -1 in labels else 0)
+    plt.title('DBSCAN - Estimated number of clusters: %d' % n_clusters_)
     plt.show()
 
 def images_as_matrix(N=563):
@@ -132,6 +134,22 @@ def report_clusters(ids, labels, report_file):
         ofil.write('\n'.join(html))
 
 DIV_STYLE = """style = "display: block;border-style: solid; border-width: 5px;border-color:blue;padding:5px;margin:5px;" """
+
+#From Scilearn - DBSCAN Demo
+def DBSCAN_Report(X,labels,labels_true):
+    n_clusters_ = len(set(labels)) - (1 if -1 in labels else 0)
+    n_noise_ = list(labels).count(-1)
+    print('Estimated number of clusters: %d' % n_clusters_)
+    print('Estimated number of noise points: %d' % n_noise_)
+    print("Homogeneity: %0.3f" % metrics.homogeneity_score(labels_true, labels))
+    print("Completeness: %0.3f" % metrics.completeness_score(labels_true, labels))
+    print("V-measure: %0.3f" % metrics.v_measure_score(labels_true, labels))
+    print("Adjusted Rand Index: %0.3f"
+          % metrics.adjusted_rand_score(labels_true, labels))
+    print("Adjusted Mutual Information: %0.3f"
+          % metrics.adjusted_mutual_info_score(labels_true, labels))
+    print("Silhouette Coefficient: %0.3f"
+          % metrics.silhouette_score(X, labels))
 
 def cluster_div(prev,ids,lbl_lists):
     div = []    
