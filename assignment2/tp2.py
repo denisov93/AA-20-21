@@ -32,18 +32,7 @@ from collections import Counter
 
 DECOMP_NUM_FEATURES = 6
 NUM_IMAGES = 563
-FEATURE_LBL = []
 
-'''FeatureLabeling'''
-def featureLabel():
-    x = 1
-    while x < 17:
-        FEATURE_LBL.append('F'+str(x))
-        x+=1
-    #print(features)
-'''End of FeatureLabeling'''
-
-featureLabel()
 imgMatrix = aux.images_as_matrix(NUM_IMAGES)
 print('Info: Loaded',imgMatrix.shape[0],'images.')
 input_data = "labels.txt"
@@ -157,9 +146,7 @@ for i in range (6):
 labelledCells = cell_cycle_labels[cell_cycle_labels[:,1] != 0,:]
 y=np.array(labelledCells[:,1])
 
-print(y)
 labelledFeatures = X_features[cell_cycle_labels[:,1] != 0,:]
-print(labelledFeatures.shape)
 
 from sklearn.feature_selection import SelectKBest
 from sklearn.feature_selection import f_classif
@@ -169,8 +156,32 @@ from sklearn.cluster import KMeans
 import matplotlib.pyplot as plt
 
 sample = f_classif(labelledFeatures, y)
-print("Classification")
-print(sample)
+print('ANOVA Classification [F-value,p-value]')
+pValues = np.array(sample).T
+print(pValues)
+
+nbestcounter = 0
+index = 0
+bestFeaturesIndex = []
+for nbestcounter in range(3):
+    for index in range(len(pValues)):
+        value = pValues[index][1]
+        if(value == pValues.min() and (index not in bestFeaturesIndex)):
+            pValues[index][1] = 1
+            bestFeaturesIndex.append(index)
+
+print('BestFeaturesIndex:',bestFeaturesIndex)
+print('X_18Features Shape:', X_features.shape)
+X_4features = []
+nbestcounter = 0
+for nbestcounter in range(4):
+    X_4features.append(X_features.T[:][bestFeaturesIndex[nbestcounter]])
+
+X_4features = np.array(X_4features).T
+
+print('X_4Features Shape:',X_4features.shape)
+print('X_4Features:',X_4features)
+print('X_Features:',X_features)
 
 ovr = OneVsRestClassifier(SVC(kernel='rbf', gamma=0.7, C=10)).fit(labelledFeatures, y)
 prediction = ovr.predict(sample)
@@ -191,28 +202,20 @@ from sklearn.neighbors import KNeighborsClassifier
 
 
 ones = np.ones(cell_cycle_labels[:,1].shape[0])
-dist,index = KNeighborsClassifier(n_neighbors=5).fit(X_features, ones).kneighbors()
+dist,index = KNeighborsClassifier(n_neighbors=5).fit(X_4features, ones).kneighbors()
 classifff = np.amax(dist,1)
 classifff[::-1].sort()
 
-deriv = [ (classifff[i]-classifff[i-1])/(1/float(classifff.shape[0]) )  for i in range(1,classifff.shape[0])]
-
-
-
-aux.plot_elbow(classifff,index[:,1],file_name="plot.png")
-
+aux.plot_elbow(classifff,index[:,1])
 
 
 from sklearn.cluster import DBSCAN
-dbscan=DBSCAN(eps=2400,min_samples=5)
+dbscan=DBSCAN(eps=1300, min_samples=5)
 model=dbscan.fit(X_features)
-core_samples_mask = np.zeros_like(model.labels_, dtype=bool)
-core_samples_mask[model.core_sample_indices_] = True
-labelsdb = model.labels_
+labelsdb = model.fit_predict(X_features)
 
-
-dbscan2=DBSCAN(eps=1550,min_samples=5)
-m2 = dbscan2.fit_predict(X_features)
+#dbscan2=DBSCAN(eps=2850,min_samples=5)
+#m2 = dbscan2.fit_predict(X_features)
 #print("-------------->",m2)
 
 
@@ -220,17 +223,15 @@ kmeans = KMeans(n_clusters=3).fit(X_features)
 labelskm = kmeans.predict(X_features)
 centroids = kmeans.cluster_centers_
 
-#aux.plot_centroids(X_features, cell_cycle_labels[:,1], centroids,file_name='all.png')
+aux.plot_label_classification(X_features, cell_cycle_labels[:,1])
 
-#aux.plot_centroids(X_features,labelskm, centroids, file_name='centroid.png')
+#aux.plot_centroids(X_features, labelskm, centroids, file_name='centroid.png')
 
-aux.plot_db(X_features,labelsdb,3,core_samples_mask)
+aux.plot_db(X_features,labelsdb,len(centroids))
 
 #aux.plot_iris(X_features,m2,file_name='trying.png')
 
-print(labelsdb)
-
-#aux.report_clusters(cell_cycle_labels[:,0], labelsdb ,"meufilemagnifico.html")
+aux.report_clusters(cell_cycle_labels[:,0], labelsdb ,"cluster_report.html")
 
 
 print('[End of Execution]')
