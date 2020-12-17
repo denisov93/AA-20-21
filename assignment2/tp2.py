@@ -28,6 +28,7 @@ reaching some conclusion about the best way of grouping these images.
 #imports
 import tp2_aux as aux 
 import numpy as np
+import matplotlib.pyplot as plt
 from collections import Counter
 from sklearn.feature_selection import SelectKBest
 from sklearn.feature_selection import f_classif
@@ -44,6 +45,7 @@ DECOMP_NUM_FEATURES = 6
 NUM_IMAGES = 563
 
 imgMatrix = aux.images_as_matrix(NUM_IMAGES)
+
 print('Info: Loaded',imgMatrix.shape[0],'images.')
 input_data = "labels.txt"
 cell_cycle_labels = np.loadtxt(input_data, delimiter=",")
@@ -88,14 +90,22 @@ stand_scale =  preprocess.StandardScaler()
 X = imgMatrix
 allowFeatureProcessing = True
 
+maxValue = max(map(max, X))
+X = X/maxValue
+
 X_pca = []
 X_isom = []
 X_tsne = []
-X_features = []
+X_18features = []
 
-X_pca = aux.loadFeatureFile('pca')
-X_isom = aux.loadFeatureFile('isom')
-X_tsne = aux.loadFeatureFile('tsne')
+try:
+    X_pca = aux.loadFeatureFile('pca')
+    X_isom = aux.loadFeatureFile('isom')
+    X_tsne = aux.loadFeatureFile('tsne')
+except:
+    X_pca = []
+    X_isom = []
+    X_tsne = []
 
 if(len(X_pca)>0 and len(X_isom)>0 and len(X_tsne)>0):
     allowFeatureProcessing = False
@@ -106,7 +116,7 @@ if(allowFeatureProcessing):
     #PCA Feature Extraction
     pca = decomp.PCA(n_components=DECOMP_NUM_FEATURES)
     X_std_pca = stand_scale.fit_transform(X)
-    X_pca = pca.fit_transform(X_std_pca)
+    X_pca = pca.transform(X_std_pca)
     print('(1/3) PCA Complete')
     #print(X_pca.shape) #output check
     #print(X_pca) #output check
@@ -114,7 +124,7 @@ if(allowFeatureProcessing):
     #Isometric Feature Extraction
     isom = manifold.Isomap(n_components=DECOMP_NUM_FEATURES)
     X_std_isom = stand_scale.fit_transform(X)
-    X_isom = isom.fit_transform(X_std_isom)
+    X_isom = isom.transform(X_std_isom)
     print('(2/3) Isometric Complete')
     #print(X_isom.shape) #output check
     #print(X_isom) #output check
@@ -122,7 +132,7 @@ if(allowFeatureProcessing):
     #t-SNE Feature Extraction
     tsne = manifold.TSNE(n_components=DECOMP_NUM_FEATURES, method='exact')
     X_std_tsne = stand_scale.fit_transform(X)
-    X_tsne = tsne.fit_transform(X_std_tsne)
+    X_tsne = tsne.transform(X_std_tsne)
     print('(3/3) t-SNE Complete')
     #print(X_tsne.shape) #output check
     #print(X_tsne) #output check
@@ -134,41 +144,31 @@ if(allowFeatureProcessing):
     print('[End of Feature Extraction]')
 ###End of Feature Extraction
 
-X_features = np.append(X_features,X_pca.T)
-X_features = np.append(X_features,X_isom.T)
-X_features = np.append(X_features,X_tsne.T)
-X_features = X_features.reshape(DECOMP_NUM_FEATURES*3,NUM_IMAGES).T
+X_18features = np.append(X_18features,X_pca.T)
+X_18features = np.append(X_18features,X_tsne.T)
+X_18features = np.append(X_18features,X_isom.T)
+X_18features = X_18features.reshape(DECOMP_NUM_FEATURES*3,NUM_IMAGES).T
 
-
-'''
-i=0
-for i in range (6):
-    if(X_features[0][i] == X_pca[0][i]):
-        print("PCA Checks Out!")
-    if(X_features[0][i+6] == X_isom[0][i]):
-        print("ISOM Checks Out!")
-    if(X_features[0][i+12] == X_tsne[0][i]):
-        print("TSNE Checks Out!")
-'''
 labelledCells = cell_cycle_labels[cell_cycle_labels[:,1] != 0,:]
 y=np.array(labelledCells[:,1])
 
-labelledFeatures = X_features[cell_cycle_labels[:,1] != 0,:]
+labelledFeatures = X_18features[cell_cycle_labels[:,1] != 0,:]
 
 aux.panda_plots(Features=labelledFeatures[:,0:6],ClassLabels=y,Title="X_pca_0_6.png")
-aux.panda_plots(Features=labelledFeatures[:,6:12],ClassLabels=y,Title="X_isom_7_12.png")
-aux.panda_plots(Features=labelledFeatures[:,12:18],ClassLabels=y,Title="X_tsne_13_18.png")
+aux.panda_plots(Features=labelledFeatures[:,6:12],ClassLabels=y,Title="X_tsne_7_12.png")
+aux.panda_plots(Features=labelledFeatures[:,12:18],ClassLabels=y,Title="X_isom_13_18.png")
 aux.panda_plots(Features=labelledFeatures,ClassLabels=y,Title="All.png")
 
 
 sample = f_classif(labelledFeatures, y)
-print('ANOVA Classification [F-value,p-value]')
+#print('ANOVA Classification [F-value,p-value]')
 ANOVAValues = np.array(sample).T
-print(ANOVAValues)
+#print(ANOVAValues)
 
 nbestcounter = 0
 index = 0
 bestFeaturesIndex = []
+
 
 for nbestcounter in range(2):
     for index in range(len(ANOVAValues)):
@@ -177,28 +177,20 @@ for nbestcounter in range(2):
             ANOVAValues[index][0] = 9e-99
             bestFeaturesIndex.append(index)
 
-
 print('BestFeaturesIndex:',bestFeaturesIndex)
-print('X_18Features Shape:', X_features.shape)
-X_4features = []
-nbestcounter = 0
+print('X_18Features Shape:', X_18features.shape)
 
-aux.plotdesci(X_features,file_name='defsGraph.png')
 
-targetIndexes = [1,2]
+#aux.plotdesci(X_18features,file_name='18FeatGraph.png')
 
-for nbestcounter in range(len(targetIndexes)):
-    X_4features.append(X_features.T[:][targetIndexes[nbestcounter]])
+targetIndexes = [1,12,13] #Best
+testFeaturesIndex = [0] #Others
 
-X_4features = np.array(X_4features).T
-
-print('X_4Features Shape:',X_4features.shape)
-#print('X_4Features:',X_4features)
-#print('X_Features:',X_features)
+X_selectedfeatures = aux.getFeaturesFromIndexes(X_18features,targetIndexes,testFeaturesIndex)
 
 # Create an SelectKBest object to select features with two best F-Values
 print("SelectKBest Features")
-fvalue_selector = SelectKBest(f_classif, k=3)
+fvalue_selector = SelectKBest(f_classif, k=5)
 # Apply the SelectKBest object to the features and target
 # Selecionado as que tem menos probabilidade e maior F1-score (probabilidade de independencia dos dados ser maior)
 X_kbest = fvalue_selector.fit_transform(labelledFeatures, y)
@@ -207,11 +199,19 @@ X_kbest = fvalue_selector.fit_transform(labelledFeatures, y)
 #aux.plot_iris(X_kbest, y)
 
 
+FEATURES = X_selectedfeatures
 
+K_NEIGHBORS = 5
 
+print("Doing KNeighbors K="+str(K_NEIGHBORS))
 ones = np.ones(cell_cycle_labels[:,1].shape[0])
-dist,index = KNeighborsClassifier(n_neighbors=5).fit(X_4features, ones).kneighbors(X_4features)
+dist,index = KNeighborsClassifier(n_neighbors=K_NEIGHBORS).fit(FEATURES, ones).kneighbors(FEATURES)
 classifff = np.amax(dist,1)
+
+DIST_MIN = classifff.min()
+DIST_MAX = classifff.max()
+
+print("DistMin:",DIST_MIN,"\nDistMax:",DIST_MAX,"\n")
 
 deriv = np.amax(dist,1)
 deriv.sort()
@@ -220,34 +220,32 @@ derivated = [ (deriv[i]-deriv[i-1])/(1/deriv.shape[0])  for i in range(0,deriv.s
 
 deriv_max = np.array(derivated[:]) > 1 
 
-
 classifff[::-1].sort()
-eps = np.mean(classifff[deriv_max])
 
-print("EPS value",eps)
-
-#aux.plot_elbow(derivated,index[:,1])
-aux.plot_elbow(classifff,index[:,1])
-aux.plot_hist(dist,X_4features)
-
-FEATURES = X_4features
-
-DBSCAN_EPS = eps
-DBSCAN_MIN_POINTS = 5
+aux.plot_sorted_kdistgraph(classifff,K_NEIGHBORS)
 
 
+#eps where separation from noise/cluster happens
+DBSCAN_EPS = 11 #Manually Picked EPS from 5-dist graph 
+DBSCAN_MIN_POINTS = 5 #Keep min points at 5
+
+print("DBSCAN> ε:",DBSCAN_EPS,"minPoints:",DBSCAN_MIN_POINTS)
 dbscan=DBSCAN(eps=DBSCAN_EPS, min_samples=DBSCAN_MIN_POINTS)
 model=dbscan.fit(FEATURES)
 labelsdb = model.fit_predict(FEATURES)
 aux.DBSCAN_Report(FEATURES,labelsdb,cell_cycle_labels[:,1])
 
-KMEANS_N_CLUSTERS = 3
+
+FEATURES = X_selectedfeatures
+KMEANS_N_CLUSTERS = 6
+
+aux.kmeans_elbow(FEATURES,cell_cycle_labels[:,1],KMEANS_N_CLUSTERS)
 
 kmeans = KMeans(n_clusters=KMEANS_N_CLUSTERS).fit(FEATURES)
 labelskm = kmeans.predict(FEATURES)
 centroids = kmeans.cluster_centers_
 
-#aux.plot_label_classification(X_features, cell_cycle_labels[:,1])
+#aux.plot_label_classification(X_18features, cell_cycle_labels[:,1])
 
 aux.plot_centroids(FEATURES, labelskm, centroids, file_name='centroid.png')
 

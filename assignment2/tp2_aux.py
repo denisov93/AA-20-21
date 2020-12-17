@@ -8,6 +8,7 @@ from skimage.io import imread
 from sklearn import metrics
 import matplotlib.pyplot as plt
 import matplotlib.patches as mpatches
+from sklearn.cluster import KMeans
 import pandas as pd
 from pandas.plotting import parallel_coordinates
 #imports for saving/loading
@@ -33,19 +34,6 @@ def loadFeatureFile(name):
         json_raw = json.loads(loadfile)
         data = np.array(json_raw)        
     return data
-
-def plot_hist(X,y):
-    plt.title('Histogram')
-    plt.figure(figsize=FIGSIZE)
-    plt.hist(X, bins='auto')
-    plt.show()
-    
-def plot_elbow(X,y,file_name="elbowplot.png"):
-    plt.figure(figsize=FIGSIZE)
-    plt.title('Elbow')
-    f1, = plt.plot(X, color='red', label='Elbow')
-    plt.legend(handles=[f1])
-    plt.savefig(file_name, dpi=200, bbox_inches='tight')
     
 def plot_iris(X,y,file_name="plot.png"):
     plt.figure(figsize=FIGSIZE)
@@ -69,22 +57,76 @@ def plot_label_classification(X,y,file_name="labelclassify.png"):
     
 def plot_centroids(X,y,centroids,file_name="centroidplot.png"):
     plt.figure(figsize=FIGSIZE)
-    plt.title('Clusters & Centroids')
-    plt.plot(X[y==0,0], X[y==0,1],'o', markersize=7, color='blue', alpha=0.4)
-    plt.plot(X[y==1,0], X[y==1,1],'o', markersize=7, color='green', alpha=0.7)
-    plt.plot(X[y==2,0], X[y==2,1],'o', markersize=7, color='red', alpha=0.7)
-    plt.plot(X[y==3,0], X[y==3,1],'o', markersize=7, color='orange', alpha=0.7)
+    ALPHA = 0.3
+    plt.title('KMEANS - Clusters & Centroids')
+    plt.plot(X[y==0,0], X[y==0,1],'o', markersize=7, color='blue', alpha=ALPHA)
+    plt.plot(X[y==1,0], X[y==1,1],'o', markersize=7, color='green', alpha=ALPHA)
+    plt.plot(X[y==2,0], X[y==2,1],'o', markersize=7, color='red', alpha=ALPHA)
+    plt.plot(X[y==3,0], X[y==3,1],'o', markersize=7, color='orange', alpha=ALPHA)
+    plt.plot(X[y==4,0], X[y==4,1],'o', markersize=7, color='pink', alpha=ALPHA)
+    plt.plot(X[y==5,0], X[y==5,1],'o', markersize=7, color='cyan', alpha=ALPHA)
+    plt.plot(X[y==6,0], X[y==6,1],'o', markersize=7, color='yellow', alpha=ALPHA)
     plt.scatter(centroids[:, 0], centroids[:, 1], marker='x',
     color='k',s=100, linewidths=3)
     plt.gca().set_aspect('equal',adjustable='box')
+    plt.savefig(file_name, dpi=400, bbox_inches='tight')
+
+def kmeans_elbow(X,labels,N_CLUSTERS,file_name="elbowplot.png"):
+    
+    df=pd.DataFrame(X)
+    distortions = []
+    K = range(1,10)
+    for k in K:
+        kmeanModel = KMeans(n_clusters=k)
+        kmeanModel.fit(df)
+        distortions.append(kmeanModel.inertia_)
+    
+    plt.figure(figsize=FIGSIZE)
+    plt.plot(K, distortions, 'bx-')
+    plt.title('Elbow Method showing optimal k')
+    plt.xlabel('k')
+    plt.ylabel('Distortion')
     plt.savefig(file_name, dpi=200, bbox_inches='tight')
+    
+    kmeanModel = KMeans(n_clusters=N_CLUSTERS)
+    kmeanModel.fit(df)
+    df['k_means']=kmeanModel.predict(df)
+    df['target']=labels
+    fig, axes = plt.subplots(1, 2, figsize=FIGSIZE)
+    axes[0].scatter(df[0], df[1], c=df['target'])
+    axes[1].scatter(df[0], df[1], c=df['k_means'], cmap=plt.cm.Set1)
+    axes[0].set_title('Actual Target', fontsize=14)
+    axes[1].set_title('K_Means', fontsize=14)
+
+def plot_sorted_kdistgraph(X,K_NEIGHBORS):
+    dist = np.array(X/np.array(X).max()).copy()
+    FIGSIZE = (7,7)
+    plt.figure(figsize=FIGSIZE)
+    #plt.annotate("Threshold", xy=(0, 0), xytext=(0, 0),arrowprops=dict(arrowstyle="->"))
+    #plt.axvline(x=50)
+    plt.plot(dist,'.',color="black", markersize=1)
+    plt.ylabel(str(K_NEIGHBORS)+"-dist")
+    plt.xlabel("Points")
+    plt.title("Sorted "+str(K_NEIGHBORS)+"-dist graph from sample")
+    plt.savefig(str(K_NEIGHBORS)+"-dist graph", dpi=400, bbox_inches='tight')
+
+def getFeaturesFromIndexes(X_18features,targetIndexes,testFeaturesIndex):
+    X_selectedfeatures = []
+    nbestcounter = 0
+    targetIndexes = np.append(targetIndexes, testFeaturesIndex)
+    print('Selected features:',targetIndexes)
+    for nbestcounter in range(len(targetIndexes)):
+        X_selectedfeatures.append(X_18features.T[:][targetIndexes[nbestcounter]])
+    X_selectedfeatures = np.array(X_selectedfeatures).T
+    print('X_selectedfeatures Shape:',X_selectedfeatures.shape)
+    return X_selectedfeatures
 
 def plotdesci(X,file_name):
     plt.figure(figsize=FIGSIZE)
-    plt.title('18 Features Plot')
-    plt.xlim(xmax = 18, xmin = 0)
+    plt.title(str(X.shape[1])+' Features Plot')
+    plt.xlim(xmax = X.shape[1], xmin = -1)
     plt.grid(color='black', linestyle='-', linewidth=1)
-    for i in range(18):
+    for i in range(X.shape[1]):
         r = random.random()
         b = random.random()
         g = random.random()
@@ -95,14 +137,14 @@ def plotdesci(X,file_name):
     
 def panda_plots(Features,ClassLabels,Title):
     plt.figure(figsize=FIGSIZE)
-    plt.title('18 Features Plot')
+    plt.title('Features Plot')
     plt.xlim(xmax = 19, xmin = -1)
     plt.grid(color='black', linestyle='-', linewidth=1)
 
     df = pd.DataFrame(Features)
     df['Labels']=ClassLabels
 
-    pd.plotting.parallel_coordinates(df, 'Labels', color=["yellow", "tomato","dodgerblue"]);
+    pd.plotting.parallel_coordinates(df, 'Labels', color=["red", "blue", "green", "yellow"]);
     
     plt.plot(df)
     
