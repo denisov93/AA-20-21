@@ -8,6 +8,7 @@ from skimage.io import imread
 from sklearn import metrics
 import matplotlib.pyplot as plt
 import matplotlib.patches as mpatches
+import pandas as pd
 
 #imports for saving/loading
 import json, codecs, os.path
@@ -34,6 +35,7 @@ def loadFeatureFile(name):
     return data
 
 def plot_hist(X,y):
+    plt.title('Histogram')
     plt.figure(figsize=FIGSIZE)
     plt.hist(X, bins='auto')
     plt.show()
@@ -77,9 +79,9 @@ def plot_centroids(X,y,centroids,file_name="centroidplot.png"):
     plt.gca().set_aspect('equal',adjustable='box')
     plt.savefig(file_name, dpi=200, bbox_inches='tight')
 
-def plotdesci(X,y,file_name):
+def plotdesci(X,file_name):
     plt.figure(figsize=FIGSIZE)
-    plt.title('def')
+    plt.title('18 Features Plot')
     plt.xlim(xmax = 18, xmin = 0)
     plt.grid(color='black', linestyle='-', linewidth=1)
     for i in range(18):
@@ -89,10 +91,13 @@ def plotdesci(X,y,file_name):
         color = (r, g, b)
         f1, = plt.plot(X[i], color=color)
     
-    plt.legend(handles=[f1])
-    plt.savefig(file_name, dpi=200, bbox_inches='tight')
+    plt.savefig(file_name, dpi=400, bbox_inches='tight')
     
-
+def panda_plots(Features,ClassLabels,Title):
+    df = pd.Dataframe(Features)
+    plt(df)
+    plt.title(Title)
+    plt.show()
 
 def plot_db(X,labels):
     # Black removed and is used for noise instead.

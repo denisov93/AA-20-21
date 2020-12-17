@@ -155,7 +155,6 @@ from sklearn.feature_selection import f_classif
 from sklearn.multiclass import OneVsRestClassifier
 from sklearn.svm import SVC
 from sklearn.cluster import KMeans
-import matplotlib.pyplot as plt
 
 sample = f_classif(labelledFeatures, y)
 print('ANOVA Classification [F-value,p-value]')
@@ -179,7 +178,7 @@ print('X_18Features Shape:', X_features.shape)
 X_4features = []
 nbestcounter = 0
 
-aux.plotdesci(X_features,y,file_name='defsGraph.png')
+aux.plotdesci(X_features,file_name='defsGraph.png')
 
 targetIndexes = [0,3,8,13]
 
@@ -188,32 +187,9 @@ for nbestcounter in range(len(targetIndexes)):
 
 X_4features = np.array(X_4features).T
 
-'''
-from scipy.stats import pearsonr
-from scipy.stats import spearmanr
-resp = []
-for j in range(len(bestFeaturesIndex)):
-    #print("Cor",bestFeaturesIndex[j])
-    inter = []
-    for i in range(len(bestFeaturesIndex)):            
-            #print(np.cov(X_4features[:,j],X_4features[:,i]))
-            pre = spearmanr(X_4features[:,j],X_4features[:,i])[0]
-            if pre >= 0.5 :
-                inter.append(bestFeaturesIndex[i])
-            if pre <= -0.5 :
-                inter.append(bestFeaturesIndex[i])
-    resp.append(inter)
-   
-print(resp)
-     '''
 print('X_4Features Shape:',X_4features.shape)
 #print('X_4Features:',X_4features)
 #print('X_Features:',X_features)
-
-ovr = OneVsRestClassifier(SVC(kernel='rbf', gamma=0.7, C=10)).fit(labelledFeatures, y)
-prediction = ovr.predict(sample)
-print("OneVsRestClassifier")
-print(prediction)
 
 # Create an SelectKBest object to select features with two best F-Values
 print("SelectKBest Features")
@@ -245,29 +221,36 @@ eps = np.mean(classifff[deriv_max])
 
 print("EPS value",eps)
 
-aux.plot_elbow(derivated,index[:,1])
-
+#aux.plot_elbow(derivated,index[:,1])
 aux.plot_elbow(classifff,index[:,1])
-aux.plot_hist(dist,index[:,1])
+aux.plot_hist(dist,X_4features)
 
+FEATURES = X_4features
+
+DBSCAN_EPS = eps
+DBSCAN_MIN_POINTS = 5
 
 from sklearn.cluster import DBSCAN
-dbscan=DBSCAN(eps=eps, min_samples=5)
-model=dbscan.fit(X_4features)
-labelsdb = model.fit_predict(X_4features)
-aux.DBSCAN_Report(X_4features,labelsdb,cell_cycle_labels[:,1])
+dbscan=DBSCAN(eps=DBSCAN_EPS, min_samples=DBSCAN_MIN_POINTS)
+model=dbscan.fit(FEATURES)
+labelsdb = model.fit_predict(FEATURES)
+aux.DBSCAN_Report(FEATURES,labelsdb,cell_cycle_labels[:,1])
 
-kmeans = KMeans(n_clusters=3).fit(X_4features)
-labelskm = kmeans.predict(X_4features)
+KMEANS_N_CLUSTERS = 3
+
+kmeans = KMeans(n_clusters=KMEANS_N_CLUSTERS).fit(FEATURES)
+labelskm = kmeans.predict(FEATURES)
 centroids = kmeans.cluster_centers_
 
 #aux.plot_label_classification(X_features, cell_cycle_labels[:,1])
 
-aux.plot_centroids(X_4features, labelskm, centroids, file_name='centroid.png')
+aux.plot_centroids(FEATURES, labelskm, centroids, file_name='centroid.png')
 
-aux.plot_db(X_4features,labelsdb)
+aux.plot_db(FEATURES,labelsdb)
 
-aux.report_clusters(cell_cycle_labels[:,0], labelsdb ,"cluster_report.html")
+aux.report_clusters(cell_cycle_labels[:,0], labelskm ,"cluster_kmeans_report.html")
+
+aux.report_clusters(cell_cycle_labels[:,0], labelsdb ,"cluster_dbscan_report.html")
 
 
 print('[End of Execution]')
@@ -302,6 +285,8 @@ O trabalho tem essa componente de experimentação.
 Posteriormente ao clustering, 
 também poderemos chegar à conclusão de 
 qual o melhor grupo candidato de features.
+
+elementos das classes 1,2,3
 '''
 
 #Clustering Best Group of Features
