@@ -9,7 +9,7 @@ from sklearn import metrics
 import matplotlib.pyplot as plt
 import matplotlib.patches as mpatches
 import pandas as pd
-
+from pandas.plotting import parallel_coordinates
 #imports for saving/loading
 import json, codecs, os.path
 from os import path
@@ -94,10 +94,20 @@ def plotdesci(X,file_name):
     plt.savefig(file_name, dpi=400, bbox_inches='tight')
     
 def panda_plots(Features,ClassLabels,Title):
-    df = pd.Dataframe(Features)
-    plt(df)
+    plt.figure(figsize=FIGSIZE)
+    plt.title('18 Features Plot')
+    plt.xlim(xmax = 19, xmin = -1)
+    plt.grid(color='black', linestyle='-', linewidth=1)
+
+    df = pd.DataFrame(Features)
+    df['Labels']=ClassLabels
+
+    pd.plotting.parallel_coordinates(df, 'Labels', color=["yellow", "tomato","dodgerblue"]);
+    
+    plt.plot(df)
+    
     plt.title(Title)
-    plt.show()
+    plt.savefig(Title, dpi=400, bbox_inches='tight')
 
 def plot_db(X,labels):
     # Black removed and is used for noise instead.

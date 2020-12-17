@@ -29,6 +29,16 @@ reaching some conclusion about the best way of grouping these images.
 import tp2_aux as aux 
 import numpy as np
 from collections import Counter
+from sklearn.feature_selection import SelectKBest
+from sklearn.feature_selection import f_classif
+from sklearn.multiclass import OneVsRestClassifier
+from sklearn.svm import SVC
+from sklearn.cluster import KMeans
+import sklearn.decomposition as decomp
+import sklearn.manifold as manifold
+import sklearn.preprocessing as preprocess
+from sklearn.neighbors import KNeighborsClassifier
+from sklearn.cluster import DBSCAN
 
 DECOMP_NUM_FEATURES = 6
 NUM_IMAGES = 563
@@ -70,13 +80,7 @@ With each method, extract six features from the data set, for a total of 18 feat
 ###Start of Feature Extraction
 #Feature extraction is the process of computing features from the initial data
 
-#imports
-import sklearn.decomposition as decomp
-import sklearn.manifold as manifold
-#
 
-#PreProcess - Standard Scale
-import sklearn.preprocessing as preprocess
 stand_scale =  preprocess.StandardScaler() 
 #In unsupervised learning, we often need to be careful about
 #how we transform the data because the shape of its distribution 
@@ -135,6 +139,7 @@ X_features = np.append(X_features,X_isom.T)
 X_features = np.append(X_features,X_tsne.T)
 X_features = X_features.reshape(DECOMP_NUM_FEATURES*3,NUM_IMAGES).T
 
+
 '''
 i=0
 for i in range (6):
@@ -150,11 +155,11 @@ y=np.array(labelledCells[:,1])
 
 labelledFeatures = X_features[cell_cycle_labels[:,1] != 0,:]
 
-from sklearn.feature_selection import SelectKBest
-from sklearn.feature_selection import f_classif
-from sklearn.multiclass import OneVsRestClassifier
-from sklearn.svm import SVC
-from sklearn.cluster import KMeans
+aux.panda_plots(Features=labelledFeatures[:,0:6],ClassLabels=y,Title="X_pca_0_6.png")
+aux.panda_plots(Features=labelledFeatures[:,6:12],ClassLabels=y,Title="X_isom_7_12.png")
+aux.panda_plots(Features=labelledFeatures[:,12:18],ClassLabels=y,Title="X_tsne_13_18.png")
+aux.panda_plots(Features=labelledFeatures,ClassLabels=y,Title="All.png")
+
 
 sample = f_classif(labelledFeatures, y)
 print('ANOVA Classification [F-value,p-value]')
@@ -180,7 +185,7 @@ nbestcounter = 0
 
 aux.plotdesci(X_features,file_name='defsGraph.png')
 
-targetIndexes = [0,3,8,13]
+targetIndexes = [1,2]
 
 for nbestcounter in range(len(targetIndexes)):
     X_4features.append(X_features.T[:][targetIndexes[nbestcounter]])
@@ -201,7 +206,7 @@ X_kbest = fvalue_selector.fit_transform(labelledFeatures, y)
 #plot
 #aux.plot_iris(X_kbest, y)
 
-from sklearn.neighbors import KNeighborsClassifier
+
 
 
 ones = np.ones(cell_cycle_labels[:,1].shape[0])
@@ -230,7 +235,7 @@ FEATURES = X_4features
 DBSCAN_EPS = eps
 DBSCAN_MIN_POINTS = 5
 
-from sklearn.cluster import DBSCAN
+
 dbscan=DBSCAN(eps=DBSCAN_EPS, min_samples=DBSCAN_MIN_POINTS)
 model=dbscan.fit(FEATURES)
 labelsdb = model.fit_predict(FEATURES)
