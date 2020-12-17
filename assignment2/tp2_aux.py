@@ -12,6 +12,7 @@ import matplotlib.patches as mpatches
 #imports for saving/loading
 import json, codecs, os.path
 from os import path
+import random
 #
 
 #constants
@@ -32,6 +33,11 @@ def loadFeatureFile(name):
         data = np.array(json_raw)        
     return data
 
+def plot_hist(X,y):
+    plt.figure(figsize=FIGSIZE)
+    plt.hist(X, bins='auto')
+    plt.show()
+    
 def plot_elbow(X,y,file_name="elbowplot.png"):
     plt.figure(figsize=FIGSIZE)
     plt.title('Elbow')
@@ -70,6 +76,22 @@ def plot_centroids(X,y,centroids,file_name="centroidplot.png"):
     color='k',s=100, linewidths=3)
     plt.gca().set_aspect('equal',adjustable='box')
     plt.savefig(file_name, dpi=200, bbox_inches='tight')
+
+def plotdesci(X,y,file_name):
+    plt.figure(figsize=FIGSIZE)
+    plt.title('def')
+    plt.xlim(xmax = 18, xmin = 0)
+    plt.grid(color='black', linestyle='-', linewidth=1)
+    for i in range(18):
+        r = random.random()
+        b = random.random()
+        g = random.random()
+        color = (r, g, b)
+        f1, = plt.plot(X[i], color=color)
+    
+    plt.legend(handles=[f1])
+    plt.savefig(file_name, dpi=200, bbox_inches='tight')
+    
 
 
 def plot_db(X,labels):

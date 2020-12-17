@@ -173,15 +173,39 @@ for nbestcounter in range(2):
             ANOVAValues[index][0] = 9e-99
             bestFeaturesIndex.append(index)
 
+
 print('BestFeaturesIndex:',bestFeaturesIndex)
 print('X_18Features Shape:', X_features.shape)
 X_4features = []
 nbestcounter = 0
-for nbestcounter in range(4):
-    X_4features.append(X_features.T[:][bestFeaturesIndex[nbestcounter]])
+
+aux.plotdesci(X_features,y,file_name='defsGraph.png')
+
+targetIndexes = [0,3,8,13]
+
+for nbestcounter in range(len(targetIndexes)):
+    X_4features.append(X_features.T[:][targetIndexes[nbestcounter]])
 
 X_4features = np.array(X_4features).T
 
+'''
+from scipy.stats import pearsonr
+from scipy.stats import spearmanr
+resp = []
+for j in range(len(bestFeaturesIndex)):
+    #print("Cor",bestFeaturesIndex[j])
+    inter = []
+    for i in range(len(bestFeaturesIndex)):            
+            #print(np.cov(X_4features[:,j],X_4features[:,i]))
+            pre = spearmanr(X_4features[:,j],X_4features[:,i])[0]
+            if pre >= 0.5 :
+                inter.append(bestFeaturesIndex[i])
+            if pre <= -0.5 :
+                inter.append(bestFeaturesIndex[i])
+    resp.append(inter)
+   
+print(resp)
+     '''
 print('X_4Features Shape:',X_4features.shape)
 #print('X_4Features:',X_4features)
 #print('X_Features:',X_features)
@@ -193,7 +217,7 @@ print(prediction)
 
 # Create an SelectKBest object to select features with two best F-Values
 print("SelectKBest Features")
-fvalue_selector = SelectKBest(f_classif, k=5)
+fvalue_selector = SelectKBest(f_classif, k=3)
 # Apply the SelectKBest object to the features and target
 # Selecionado as que tem menos probabilidade e maior F1-score (probabilidade de independencia dos dados ser maior)
 X_kbest = fvalue_selector.fit_transform(labelledFeatures, y)
@@ -205,18 +229,30 @@ from sklearn.neighbors import KNeighborsClassifier
 
 
 ones = np.ones(cell_cycle_labels[:,1].shape[0])
-dist,index = KNeighborsClassifier(n_neighbors=5).fit(X_4features, ones).kneighbors()
+dist,index = KNeighborsClassifier(n_neighbors=5).fit(X_4features, ones).kneighbors(X_4features)
 classifff = np.amax(dist,1)
+
+deriv = np.amax(dist,1)
+deriv.sort()
+
+derivated = [ (deriv[i]-deriv[i-1])/(1/deriv.shape[0])  for i in range(0,deriv.shape[0])]
+
+deriv_max = np.array(derivated[:]) > 1 
+
+
 classifff[::-1].sort()
+eps = np.mean(classifff[deriv_max])
 
-deriv = [ (classifff[i]-classifff[i-1])/(1/float(classifff.shape[0]) )  for i in range(1,classifff.shape[0])]
+print("EPS value",eps)
 
-#aux.plot_elbow(classifff/classifff[0],index[:,1])
+aux.plot_elbow(derivated,index[:,1])
 
 aux.plot_elbow(classifff,index[:,1])
+aux.plot_hist(dist,index[:,1])
+
 
 from sklearn.cluster import DBSCAN
-dbscan=DBSCAN(eps=10.1, min_samples=5)
+dbscan=DBSCAN(eps=eps, min_samples=5)
 model=dbscan.fit(X_4features)
 labelsdb = model.fit_predict(X_4features)
 aux.DBSCAN_Report(X_4features,labelsdb,cell_cycle_labels[:,1])
