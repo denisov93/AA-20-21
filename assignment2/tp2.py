@@ -165,6 +165,10 @@ sample = f_classif(labelledFeatures, y)
 ANOVAValues = np.array(sample).T
 #print(ANOVAValues)
 
+
+#Shows labeled features
+aux.plot_labeled(labelledFeatures, y)
+
 nbestcounter = 0
 index = 0
 bestFeaturesIndex = []
@@ -184,7 +188,7 @@ print('X_18Features Shape:', X_18features.shape)
 #aux.plotdesci(X_18features,file_name='18FeatGraph.png')
 
 targetIndexes = [1,12,13] #Best
-testFeaturesIndex = [0] #Others
+testFeaturesIndex = [0,2,14] #Others
 
 X_selectedfeatures = aux.getFeaturesFromIndexes(X_18features,targetIndexes,testFeaturesIndex)
 
@@ -196,7 +200,7 @@ fvalue_selector = SelectKBest(f_classif, k=5)
 X_kbest = fvalue_selector.fit_transform(labelledFeatures, y)
 
 #plot
-#aux.plot_iris(X_kbest, y)
+aux.plot_labeled(X_kbest, y)
 
 
 FEATURES = X_selectedfeatures
@@ -226,7 +230,7 @@ aux.plot_sorted_kdistgraph(classifff,K_NEIGHBORS)
 
 
 #eps where separation from noise/cluster happens
-DBSCAN_EPS = 11 #Manually Picked EPS from 5-dist graph 
+DBSCAN_EPS = 17 #Manually Picked EPS from 5-dist graph 
 DBSCAN_MIN_POINTS = 5 #Keep min points at 5
 
 print("DBSCAN> ε:",DBSCAN_EPS,"minPoints:",DBSCAN_MIN_POINTS)
@@ -237,7 +241,7 @@ aux.DBSCAN_Report(FEATURES,labelsdb,cell_cycle_labels[:,1])
 
 
 FEATURES = X_selectedfeatures
-KMEANS_N_CLUSTERS = 6
+KMEANS_N_CLUSTERS = 7
 
 aux.kmeans_elbow(FEATURES,cell_cycle_labels[:,1],KMEANS_N_CLUSTERS)
 

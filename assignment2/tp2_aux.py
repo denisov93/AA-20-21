@@ -19,6 +19,7 @@ import random
 
 #constants
 FIGSIZE = (7,7)
+WIDE_FIGSIZE = (14,7)
 
 # function def
 def saveFeatures(data,name):
@@ -64,14 +65,13 @@ def plot_centroids(X,y,centroids,file_name="centroidplot.png"):
     plt.plot(X[y==2,0], X[y==2,1],'o', markersize=7, color='red', alpha=ALPHA)
     plt.plot(X[y==3,0], X[y==3,1],'o', markersize=7, color='orange', alpha=ALPHA)
     plt.plot(X[y==4,0], X[y==4,1],'o', markersize=7, color='pink', alpha=ALPHA)
-    plt.plot(X[y==5,0], X[y==5,1],'o', markersize=7, color='cyan', alpha=ALPHA)
-    plt.plot(X[y==6,0], X[y==6,1],'o', markersize=7, color='yellow', alpha=ALPHA)
+    plt.plot(X[y==5,0], X[y==5,1],'o', markersize=7, color='lime', alpha=ALPHA)
+    plt.plot(X[y==6,0], X[y==6,1],'o', markersize=7, color='purple', alpha=ALPHA)
     plt.scatter(centroids[:, 0], centroids[:, 1], marker='x',
     color='k',s=100, linewidths=3)
-    plt.gca().set_aspect('equal',adjustable='box')
     plt.savefig(file_name, dpi=400, bbox_inches='tight')
 
-def kmeans_elbow(X,labels,N_CLUSTERS,file_name="elbowplot.png"):
+def kmeans_elbow(X,labels,N_CLUSTERS):
     
     df=pd.DataFrame(X)
     distortions = []
@@ -86,17 +86,28 @@ def kmeans_elbow(X,labels,N_CLUSTERS,file_name="elbowplot.png"):
     plt.title('Elbow Method showing optimal k')
     plt.xlabel('k')
     plt.ylabel('Distortion')
-    plt.savefig(file_name, dpi=200, bbox_inches='tight')
-    
+    plt.savefig("elbowplot.png", bbox_inches='tight')
+
     kmeanModel = KMeans(n_clusters=N_CLUSTERS)
     kmeanModel.fit(df)
     df['k_means']=kmeanModel.predict(df)
     df['target']=labels
-    fig, axes = plt.subplots(1, 2, figsize=FIGSIZE)
+    fig, axes = plt.subplots(1, 2, figsize=WIDE_FIGSIZE)
     axes[0].scatter(df[0], df[1], c=df['target'])
     axes[1].scatter(df[0], df[1], c=df['k_means'], cmap=plt.cm.Set1)
     axes[0].set_title('Actual Target', fontsize=14)
     axes[1].set_title('K_Means', fontsize=14)
+    plt.savefig("kmeans compare", bbox_inches='tight')
+    
+def plot_labeled(X,y):
+    plt.figure(figsize=FIGSIZE)
+    ALPHA = 0.7
+    plt.plot(X[y==0,0], X[y==0,1],'o', markersize=7, color='blue', alpha=ALPHA)
+    plt.plot(X[y==1,0], X[y==1,1],'o', markersize=7, color='green', alpha=ALPHA)
+    plt.plot(X[y==2,0], X[y==2,1],'o', markersize=7, color='red', alpha=ALPHA)
+    plt.plot(X[y==3,0], X[y==3,1],'o', markersize=7, color='orange', alpha=ALPHA)
+    plt.title('Labeled Plot')
+    plt.savefig("labeled.png", bbox_inches='tight')
 
 def plot_sorted_kdistgraph(X,K_NEIGHBORS):
     dist = np.array(X/np.array(X).max()).copy()
@@ -108,7 +119,7 @@ def plot_sorted_kdistgraph(X,K_NEIGHBORS):
     plt.ylabel(str(K_NEIGHBORS)+"-dist")
     plt.xlabel("Points")
     plt.title("Sorted "+str(K_NEIGHBORS)+"-dist graph from sample")
-    plt.savefig(str(K_NEIGHBORS)+"-dist graph", dpi=400, bbox_inches='tight')
+    plt.savefig(str(K_NEIGHBORS)+"-dist graph", dpi=200, bbox_inches='tight')
 
 def getFeaturesFromIndexes(X_18features,targetIndexes,testFeaturesIndex):
     X_selectedfeatures = []
@@ -133,7 +144,7 @@ def plotdesci(X,file_name):
         color = (r, g, b)
         f1, = plt.plot(X[i], color=color)
     
-    plt.savefig(file_name, dpi=400, bbox_inches='tight')
+    plt.savefig(file_name, dpi=200, bbox_inches='tight')
     
 def panda_plots(Features,ClassLabels,Title):
     plt.figure(figsize=FIGSIZE)
@@ -149,11 +160,11 @@ def panda_plots(Features,ClassLabels,Title):
     plt.plot(df)
     
     plt.title(Title)
-    plt.savefig(Title, dpi=400, bbox_inches='tight')
+    plt.savefig(Title, dpi=200, bbox_inches='tight')
 
 def plot_db(X,labels):
     # Black removed and is used for noise instead.
-    plt.figure(figsize=FIGSIZE)
+    plt.figure(figsize=FIGSIZE, dpi=400)
     unique_labels = set(labels)
     colors = [plt.cm.Spectral(each)
               for each in np.linspace(0, 1, len(unique_labels))]
@@ -167,11 +178,11 @@ def plot_db(X,labels):
         if k == -1: #draw noise
             xy = X[class_member_mask]
             plt.plot(xy[:, 0], xy[:, 1], 'o', markerfacecolor=tuple(col),
-                     markeredgecolor='k', markersize=7, alpha=0.33)
+                     markeredgecolor='k', markersize=4, alpha=0.60)
         else: #draw class
             xy = X[class_member_mask]
             plt.plot(xy[:, 0], xy[:, 1], 'o', markerfacecolor=tuple(col),
-                     markeredgecolor='k', markersize=10, alpha=0.77)
+                     markeredgecolor='k', markersize=5, alpha=0.60)
     
     n_clusters_ = len(set(labels)) - (1 if -1 in labels else 0)
     plt.title('DBSCAN - Estimated number of clusters: %d' % n_clusters_)
@@ -220,15 +231,15 @@ def DBSCAN_Report(X,labels,labels_true):
     n_noise_ = list(labels).count(-1)
     print('Estimated number of clusters: %d' % n_clusters_)
     print('Estimated number of noise points: %d' % n_noise_)
-    print("Homogeneity: %0.3f" % metrics.homogeneity_score(labels_true, labels))
-    print("Completeness: %0.3f" % metrics.completeness_score(labels_true, labels))
+    print("Homogeneity: %0.3f" % metrics.homogeneity_score(labels_true, labels),"(identical cumulative distribution functions)")
+    print("Completeness: %0.3f" % (metrics.completeness_score(labels_true, labels)*100)+str("%"))
     print("V-measure: %0.3f" % metrics.v_measure_score(labels_true, labels))
     print("Adjusted Rand Index: %0.3f"
-          % metrics.adjusted_rand_score(labels_true, labels))
+          % metrics.adjusted_rand_score(labels_true, labels),"(Similarity between data)")
     print("Adjusted Mutual Information: %0.3f"
           % metrics.adjusted_mutual_info_score(labels_true, labels))
     print("Silhouette Coefficient: %0.3f"
-          % metrics.silhouette_score(X, labels))
+          % metrics.silhouette_score(X, labels),"[-1,1]")
 
 def cluster_div(prev,ids,lbl_lists):
     div = []    
