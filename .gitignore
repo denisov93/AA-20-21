@@ -8,3 +8,5 @@ assignment2/isom.json
 assignment2/pca.json
 assignment2/__pycache__/tp2_aux.cpython-39.pyc
 assignment2/*.html
+assignment2/cluster_kmeans_report.html
+assignment2/cluster_dbscan_report.html

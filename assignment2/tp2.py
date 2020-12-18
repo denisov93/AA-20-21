@@ -28,7 +28,6 @@ reaching some conclusion about the best way of grouping these images.
 #imports
 import tp2_aux as aux 
 import numpy as np
-import matplotlib.pyplot as plt
 from collections import Counter
 from sklearn.feature_selection import SelectKBest
 from sklearn.feature_selection import f_classif
@@ -184,8 +183,6 @@ nbestcounter = 0
 index = 0
 bestFeaturesIndex = []
 
-print(ANOVAValues)
-
 while(len(bestFeaturesIndex)<8):
     for index in range(len(ANOVAValues)):
         value = ANOVAValues[index][0]
@@ -198,11 +195,12 @@ print('X_18Features Shape:', X_18features.shape)
 
 
 #aux.plotdesci(X_18features,file_name='18FeatGraph.png')
-#[1,12,13,0,2,14]
-targetIndexes = [1,12,13] #Best
-testFeaturesIndex = [10,0,14] #from observations
+#[1, 12, 13, 10, 0, 2, 14, 17]
+#[0,13,10,14,1,12]
+targetIndexes = [0,13,10,14,1]
+extraIndexes = [12]
 
-X_selectedfeatures = aux.getFeaturesFromIndexes(X_18features,targetIndexes,testFeaturesIndex)
+X_selectedfeatures = aux.getFeaturesFromIndexes(X_18features,targetIndexes,extraIndexes)
 
 # Create an SelectKBest object to select features with two best F-Values
 print("SelectKBest Features")
@@ -253,10 +251,10 @@ aux.report_clusters(cell_cycle_labels[:,0], labelskm ,'cluster_kmeans_report.htm
 
 #Selecting new features for DBSCAN
 #[1, 12, 13, 10, 0, 2, 14, 17, 5, 15]
-targetIndexes = [1,12,13]
-testFeaturesIndex = [10,0,2]
+targetIndexes = [0,13,10,14,1]
+extraIndexes = [12]
 
-X_selectedfeatures = aux.getFeaturesFromIndexes(X_18features,targetIndexes,testFeaturesIndex)
+X_selectedfeatures = aux.getFeaturesFromIndexes(X_18features,targetIndexes,extraIndexes)
 FEATURES = X_selectedfeatures
 
 #DBSCAN
