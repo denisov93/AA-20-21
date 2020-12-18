@@ -34,6 +34,7 @@ from sklearn.feature_selection import f_classif
 from sklearn.multiclass import OneVsRestClassifier
 from sklearn.svm import SVC
 from sklearn.cluster import KMeans
+import itertools
 import sklearn.decomposition as decomp
 import sklearn.manifold as manifold
 import sklearn.preprocessing as preprocess
@@ -195,10 +196,10 @@ print('X_18Features Shape:', X_18features.shape)
 
 
 #aux.plotdesci(X_18features,file_name='18FeatGraph.png')
-#[1, 12, 13, 10, 0, 2, 14, 17]
+#Best Features [1, 12, 13, 10, 0, 2, 14, 17]
 #[0,13,10,14,1,12]
-targetIndexes = [0,13,10,14,1]
-extraIndexes = [12]
+targetIndexes = [0,13,10,14,1,12]
+extraIndexes = []
 
 X_selectedfeatures = aux.getFeaturesFromIndexes(X_18features,targetIndexes,extraIndexes)
 
@@ -239,7 +240,7 @@ KMEANS_N_CLUSTERS = 5
 
 aux.kmeans_elbow(FEATURES,cell_cycle_labels[:,1],KMEANS_N_CLUSTERS)
 
-kmeans = KMeans(n_clusters=KMEANS_N_CLUSTERS).fit(FEATURES)
+kmeans = KMeans(n_clusters=KMEANS_N_CLUSTERS).fit(FEATURES, ones)
 labelskm = kmeans.predict(FEATURES)
 centroids = kmeans.cluster_centers_
 
@@ -251,33 +252,39 @@ aux.report_clusters(cell_cycle_labels[:,0], labelskm ,'cluster_kmeans_report.htm
 
 #Selecting new features for DBSCAN
 #[1, 12, 13, 10, 0, 2, 14, 17, 5, 15]
-targetIndexes = [0,13,10,14,1]
-extraIndexes = [12]
+targetIndexes = [1,12,13,14,0]
 
+#for t in itertools.permutations(targetIndexes, 5):
+    #targetIndexes = np.array(t)
+    
+extraIndexes = []
+    
 X_selectedfeatures = aux.getFeaturesFromIndexes(X_18features,targetIndexes,extraIndexes)
 FEATURES = X_selectedfeatures
-
+    
 #DBSCAN
-
+    
 #eps where separation from noise/cluster happens
-DBSCAN_EPS = 13 #Manually Picked EPS from 5-dist graph 
+DBSCAN_EPS = 13.3493649965765 #Manually Picked EPS from 5-dist graph 
 DBSCAN_MIN_POINTS = 5 #Keep min points at 5
-
+    
 labelsdb = []
-
+    
 print('DBSCAN> ε:',DBSCAN_EPS,'minPoints:',DBSCAN_MIN_POINTS)
 try:
     dbscan=DBSCAN(eps=DBSCAN_EPS, min_samples=DBSCAN_MIN_POINTS)
     model=dbscan.fit(FEATURES,y)
     labelsdb = model.fit_predict(FEATURES)
-    
+            
     aux.DBSCAN_Report(FEATURES,labelsdb,cell_cycle_labels[:,1])
-    aux.plot_db(FEATURES,labelsdb)
+    aux.plot_db(FEATURES,labelsdb,'plot_dbscan_'+str(targetIndexes))
     aux.report_clusters(cell_cycle_labels[:,0], labelsdb ,'cluster_dbscan_report.html')
 except:
     print('\n/!\ Values of current configuration of DBSCAN provide no results.')
 
+
 print('[End of Execution]')
+
 
 '''
 Posteriormente ao clustering, 

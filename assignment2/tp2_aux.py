@@ -121,10 +121,11 @@ def plot_sorted_kdistgraph(X,K_NEIGHBORS):
     plt.title("Sorted "+str(K_NEIGHBORS)+"-dist graph from sample")
     plt.savefig(str(K_NEIGHBORS)+"-dist graph", dpi=200, bbox_inches='tight')
 
-def getFeaturesFromIndexes(X_18features,targetIndexes,testFeaturesIndex):
+def getFeaturesFromIndexes(X_18features,targetIndexes,extra):
     X_selectedfeatures = []
     nbestcounter = 0
-    targetIndexes = np.append(targetIndexes, testFeaturesIndex)
+    if(extra != []):
+        targetIndexes = np.append(targetIndexes, extra)
     print('Selected features:',targetIndexes)
     for nbestcounter in range(len(targetIndexes)):
         X_selectedfeatures.append(X_18features.T[:][targetIndexes[nbestcounter]])
@@ -162,7 +163,7 @@ def panda_plots(Features,ClassLabels,Title):
     plt.title(Title)
     plt.savefig(Title, dpi=200, bbox_inches='tight')
 
-def plot_db(X,labels):
+def plot_db(X,labels,file_name):
     # Black removed and is used for noise instead.
     plt.figure(figsize=FIGSIZE, dpi=400)
     unique_labels = list(np.unique(labels))
@@ -187,7 +188,7 @@ def plot_db(X,labels):
     
     n_clusters_ = len(set(labels)) - (1 if -1 in labels else 0)
     plt.title('DBSCAN - Estimated number of clusters: %d' % n_clusters_)
-    plt.show()
+    plt.savefig(file_name, dpi=400, bbox_inches='tight')
 
 def images_as_matrix(N=563):
     """
