@@ -15,6 +15,7 @@ from pandas.plotting import parallel_coordinates
 import json, codecs, os.path
 from os import path
 import random
+import matplotlib.colors as pltcolor
 #
 
 #constants
@@ -58,15 +59,14 @@ def plot_label_classification(X,y,file_name="labelclassify.png"):
     
 def plot_centroids(X,y,centroids,file_name="centroidplot.png"):
     plt.figure(figsize=FIGSIZE)
-    ALPHA = 0.3
     plt.title('KMEANS - Clusters & Centroids')
-    plt.plot(X[y==0,0], X[y==0,1],'o', markersize=7, color='blue', alpha=ALPHA)
-    plt.plot(X[y==1,0], X[y==1,1],'o', markersize=7, color='green', alpha=ALPHA)
-    plt.plot(X[y==2,0], X[y==2,1],'o', markersize=7, color='red', alpha=ALPHA)
-    plt.plot(X[y==3,0], X[y==3,1],'o', markersize=7, color='orange', alpha=ALPHA)
-    plt.plot(X[y==4,0], X[y==4,1],'o', markersize=7, color='pink', alpha=ALPHA)
-    plt.plot(X[y==5,0], X[y==5,1],'o', markersize=7, color='lime', alpha=ALPHA)
-    plt.plot(X[y==6,0], X[y==6,1],'o', markersize=7, color='purple', alpha=ALPHA)
+    
+    unique_labels = set(y)
+    colors = [plt.cm.Spectral(each)
+              for each in np.linspace(0, 1, len(unique_labels))]
+    for k, col in zip(unique_labels, colors):
+        plt.plot(X[y==k,0], X[y==k,1],'o', markersize=7, markeredgecolor='k', color=tuple(col))
+
     plt.scatter(centroids[:, 0], centroids[:, 1], marker='x',
     color='k',s=100, linewidths=3)
     plt.savefig(file_name, dpi=400, bbox_inches='tight')
@@ -165,24 +165,25 @@ def panda_plots(Features,ClassLabels,Title):
 def plot_db(X,labels):
     # Black removed and is used for noise instead.
     plt.figure(figsize=FIGSIZE, dpi=400)
-    unique_labels = set(labels)
+    unique_labels = list(np.unique(labels))
+    unique_labels.sort()
     colors = [plt.cm.Spectral(each)
               for each in np.linspace(0, 1, len(unique_labels))]
     for k, col in zip(unique_labels, colors):
         if k == -1:
             # Black used for noise.
-            col = [0, 0, 0, 1]
+            col = [0.1, 0.1, 0.1, 1]
     
         class_member_mask = (labels == k)
     
         if k == -1: #draw noise
             xy = X[class_member_mask]
             plt.plot(xy[:, 0], xy[:, 1], 'o', markerfacecolor=tuple(col),
-                     markeredgecolor='k', markersize=4, alpha=0.60)
+                     markeredgecolor='k', markersize=5, alpha=1)
         else: #draw class
             xy = X[class_member_mask]
             plt.plot(xy[:, 0], xy[:, 1], 'o', markerfacecolor=tuple(col),
-                     markeredgecolor='k', markersize=5, alpha=0.60)
+                     markeredgecolor='k', markersize=7, alpha=1)
     
     n_clusters_ = len(set(labels)) - (1 if -1 in labels else 0)
     plt.title('DBSCAN - Estimated number of clusters: %d' % n_clusters_)
@@ -212,13 +213,22 @@ def report_clusters(ids, labels, report_file):
        </head>
        <body>
        """]
-    for lbl in diff_lbls:
-        html.append(f"<h1>Cluster {lbl}</h1>")        
+    colors = [plt.cm.Spectral(each)
+              for each in np.linspace(0, 1, len(diff_lbls))]
+    for lbl, col in zip(diff_lbls, colors):
+        if lbl == -1:
+            # Black used for noise.
+            col = [0.33, 0.33, 0.33, 1]
+        
+        hexcolor = pltcolor.to_hex(col)
+        
+        html.append(f"<h1><font color={hexcolor}>*Cluster {lbl}</color></h1><div style=\"background-color:{hexcolor};\">")        
         lbl_imgs = ids[labels==lbl]          
         for count,img in enumerate(lbl_imgs):                
             html.append(f'<img src="images/{int(img)}.png" />')
             #if count % 10 == 9:
             #    html.append('<br/>')
+        html.append("</div>")   
     html.append("</body></html>")   
     with open(report_file,'w') as ofil:
         ofil.write('\n'.join(html))

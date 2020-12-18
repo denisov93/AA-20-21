@@ -82,11 +82,10 @@ With each method, extract six features from the data set, for a total of 18 feat
 ###Start of Feature Extraction
 #Feature extraction is the process of computing features from the initial data
 
-
 stand_scale =  preprocess.StandardScaler() 
 #In unsupervised learning, we often need to be careful about
 #how we transform the data because the shape of its distribution 
-#and the distances between the points may be important.
+#and the distances between the points may be important, we can standardize in this case.
 X = imgMatrix
 allowFeatureProcessing = True
 
@@ -116,7 +115,7 @@ if(allowFeatureProcessing):
     #PCA Feature Extraction
     pca = decomp.PCA(n_components=DECOMP_NUM_FEATURES)
     X_std_pca = stand_scale.fit_transform(X)
-    X_pca = pca.transform(X_std_pca)
+    X_pca = pca.fit_transform(X_std_pca)
     print('(1/3) PCA Complete')
     #print(X_pca.shape) #output check
     #print(X_pca) #output check
@@ -124,7 +123,7 @@ if(allowFeatureProcessing):
     #Isometric Feature Extraction
     isom = manifold.Isomap(n_components=DECOMP_NUM_FEATURES)
     X_std_isom = stand_scale.fit_transform(X)
-    X_isom = isom.transform(X_std_isom)
+    X_isom = isom.fit_transform(X_std_isom)
     print('(2/3) Isometric Complete')
     #print(X_isom.shape) #output check
     #print(X_isom) #output check
@@ -132,7 +131,7 @@ if(allowFeatureProcessing):
     #t-SNE Feature Extraction
     tsne = manifold.TSNE(n_components=DECOMP_NUM_FEATURES, method='exact')
     X_std_tsne = stand_scale.fit_transform(X)
-    X_tsne = tsne.transform(X_std_tsne)
+    X_tsne = tsne.fit_transform(X_std_tsne)
     print('(3/3) t-SNE Complete')
     #print(X_tsne.shape) #output check
     #print(X_tsne) #output check
@@ -143,6 +142,18 @@ if(allowFeatureProcessing):
     
     print('[End of Feature Extraction]')
 ###End of Feature Extraction
+
+'''
+(Selecting Best Features after extraction)
+
+Não há um valor fixo para o número de features. 
+Tem de que ser determinadas pelas experiências
+e devem ser confirmadas com gráficos,
+em que os eixos são pares de features, 
+mostrando quão bom ou não é o poder discriminate delas para separar as classes.
+(Silhouette, Homogeneity, Rand Index, etc)
+Nem todas as features são realmente discriminates. 
+'''
 
 X_18features = np.append(X_18features,X_pca.T)
 X_18features = np.append(X_18features,X_tsne.T)
@@ -167,14 +178,15 @@ ANOVAValues = np.array(sample).T
 
 
 #Shows labeled features
-aux.plot_labeled(labelledFeatures, y)
+#aux.plot_labeled(labelledFeatures, y)
 
 nbestcounter = 0
 index = 0
 bestFeaturesIndex = []
 
+print(ANOVAValues)
 
-for nbestcounter in range(2):
+while(len(bestFeaturesIndex)<8):
     for index in range(len(ANOVAValues)):
         value = ANOVAValues[index][0]
         if(value == ANOVAValues.max() and (index not in bestFeaturesIndex)):
@@ -186,9 +198,9 @@ print('X_18Features Shape:', X_18features.shape)
 
 
 #aux.plotdesci(X_18features,file_name='18FeatGraph.png')
-
+#[1,12,13,0,2,14]
 targetIndexes = [1,12,13] #Best
-testFeaturesIndex = [0,2,14] #Others
+testFeaturesIndex = [10,0,14] #from observations
 
 X_selectedfeatures = aux.getFeaturesFromIndexes(X_18features,targetIndexes,testFeaturesIndex)
 
@@ -198,9 +210,6 @@ fvalue_selector = SelectKBest(f_classif, k=5)
 # Apply the SelectKBest object to the features and target
 # Selecionado as que tem menos probabilidade e maior F1-score (probabilidade de independencia dos dados ser maior)
 X_kbest = fvalue_selector.fit_transform(labelledFeatures, y)
-
-#plot
-aux.plot_labeled(X_kbest, y)
 
 
 FEATURES = X_selectedfeatures
@@ -228,20 +237,7 @@ classifff[::-1].sort()
 
 aux.plot_sorted_kdistgraph(classifff,K_NEIGHBORS)
 
-
-#eps where separation from noise/cluster happens
-DBSCAN_EPS = 17 #Manually Picked EPS from 5-dist graph 
-DBSCAN_MIN_POINTS = 5 #Keep min points at 5
-
-print("DBSCAN> ε:",DBSCAN_EPS,"minPoints:",DBSCAN_MIN_POINTS)
-dbscan=DBSCAN(eps=DBSCAN_EPS, min_samples=DBSCAN_MIN_POINTS)
-model=dbscan.fit(FEATURES)
-labelsdb = model.fit_predict(FEATURES)
-aux.DBSCAN_Report(FEATURES,labelsdb,cell_cycle_labels[:,1])
-
-
-FEATURES = X_selectedfeatures
-KMEANS_N_CLUSTERS = 7
+KMEANS_N_CLUSTERS = 5
 
 aux.kmeans_elbow(FEATURES,cell_cycle_labels[:,1],KMEANS_N_CLUSTERS)
 
@@ -252,48 +248,41 @@ centroids = kmeans.cluster_centers_
 #aux.plot_label_classification(X_18features, cell_cycle_labels[:,1])
 
 aux.plot_centroids(FEATURES, labelskm, centroids, file_name='centroid.png')
+aux.report_clusters(cell_cycle_labels[:,0], labelskm ,'cluster_kmeans_report.html')
 
-aux.plot_db(FEATURES,labelsdb)
 
-aux.report_clusters(cell_cycle_labels[:,0], labelskm ,"cluster_kmeans_report.html")
+#Selecting new features for DBSCAN
+#[1, 12, 13, 10, 0, 2, 14, 17, 5, 15]
+targetIndexes = [1,12,13]
+testFeaturesIndex = [10,0,2]
 
-aux.report_clusters(cell_cycle_labels[:,0], labelsdb ,"cluster_dbscan_report.html")
+X_selectedfeatures = aux.getFeaturesFromIndexes(X_18features,targetIndexes,testFeaturesIndex)
+FEATURES = X_selectedfeatures
 
+#DBSCAN
+
+#eps where separation from noise/cluster happens
+DBSCAN_EPS = 13 #Manually Picked EPS from 5-dist graph 
+DBSCAN_MIN_POINTS = 5 #Keep min points at 5
+
+labelsdb = []
+
+print('DBSCAN> ε:',DBSCAN_EPS,'minPoints:',DBSCAN_MIN_POINTS)
+try:
+    dbscan=DBSCAN(eps=DBSCAN_EPS, min_samples=DBSCAN_MIN_POINTS)
+    model=dbscan.fit(FEATURES,y)
+    labelsdb = model.fit_predict(FEATURES)
+    
+    aux.DBSCAN_Report(FEATURES,labelsdb,cell_cycle_labels[:,1])
+    aux.plot_db(FEATURES,labelsdb)
+    aux.report_clusters(cell_cycle_labels[:,0], labelsdb ,'cluster_dbscan_report.html')
+except:
+    print('\n/!\ Values of current configuration of DBSCAN provide no results.')
 
 print('[End of Execution]')
-
-'''
-(Selecting Best Features after extraction)
-
-Nem há um valor fixo para o número de features. 
-Terá que ser determinado pelas experiências. 
-Por ex: se o valor de F que vem que f_classf nos der 
-valores de por ex: 60, 40, 2, 0.5, 0.25, 0.002 
-isto significa que o número de features
-a considerar neste critério devem ser 2. 
-Esta é uma pista que deve ser confirmada com gráficos 
-em que os eixos são pares de features, 
-mostrando quão bom ou não é o poder discriminate delas para separar as classes.
-
-É a partir das 18 que se extraem as melhores.  
-Mas é improvável que venhamos a usar as 18 
-por que nem todas são realmente discriminates. 
-Eu diria um número não superior a 4 ou 5 é tipicamente o usado. 
-É preciso experimentar. 
-O trabalho tem essa componente de experimentação.
-'''
-
-#Best Features
-
-
-#Clustering
 
 '''
 Posteriormente ao clustering, 
 também poderemos chegar à conclusão de 
 qual o melhor grupo candidato de features.
-
-elementos das classes 1,2,3
 '''
-
-#Clustering Best Group of Features
