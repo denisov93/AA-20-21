@@ -251,8 +251,10 @@ aux.report_clusters(cell_cycle_labels[:,0], labelskm ,'cluster_kmeans_report.htm
 
 
 #Selecting new features for DBSCAN
-#[1, 12, 13, 10, 0, 2, 14, 17, 5, 15]
-targetIndexes = [1,12,13,14,0]
+#Best Features [1, 12, 13, 10, 0, 2, 14, 17, 5, 15]
+#Observations [1,12,13,0,14] eps=13.3493649965765
+#Observations [] eps=
+targetIndexes = [0,13,10,14,1,12]
 
 #for t in itertools.permutations(targetIndexes, 5):
     #targetIndexes = np.array(t)
@@ -265,7 +267,7 @@ FEATURES = X_selectedfeatures
 #DBSCAN
     
 #eps where separation from noise/cluster happens
-DBSCAN_EPS = 13.3493649965765 #Manually Picked EPS from 5-dist graph 
+DBSCAN_EPS = 16.420 #Manually Picked EPS from 5-dist graph 
 DBSCAN_MIN_POINTS = 5 #Keep min points at 5
     
 labelsdb = []
