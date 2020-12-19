@@ -15,7 +15,7 @@ R1: We selected best features based on ANOVA test as for visualization, to bette
 
 
 Q2: After selecting the attributes, did you standardize or normalize the values? Justify your decision.
-R2: We did standartization ,Because we are getting 18 features from 3 different feature extraction methods, as our goal was to compare features so that no caracteristic is being lost
+R2: We did standardization and normalization, instead of using 0-255 from color values we use 0-1, also since the data isn't based on distance standardization is possible, as our goal was to compare features, so that no characteristic would be lost, we are getting 18 features from 3 different feature extraction methods, which also benefit from having 0-1 values.
 
 
 Q3: Explain how you found the neighborhood radius value (epsilon) for the DBSCAN algorithm by following the procedure described in the article "A density-based algorithm for discovering clusters in large spatial databases with noise".
