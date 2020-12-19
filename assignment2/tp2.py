@@ -63,7 +63,6 @@ def labelReporting(labels):
     print('',p1,'labeled with Phase 1.\n',p2,'labeled with Phase 2.\n',
           p3,'labeled with Phase 3.')
     print('Total unclassified:',str(p0),'\n')
-    
 labelReporting(cell_cycle_labels)
 
 '''

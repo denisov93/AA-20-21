@@ -233,7 +233,7 @@ def report_clusters(ids, labels, report_file):
     html.append("</body></html>")   
     with open(report_file,'w') as ofil:
         ofil.write('\n'.join(html))
-    print('Report Created')
+    print('Report Created\n')
 
 DIV_STYLE = """style = "display: block;border-style: solid; border-width: 5px;border-color:blue;padding:5px;margin:5px;" """
 
