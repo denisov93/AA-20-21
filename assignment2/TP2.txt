@@ -15,8 +15,7 @@ R1: We selected best features based on ANOVA test as for visualization, to bette
 
 
 Q2: After selecting the attributes, did you standardize or normalize the values? Justify your decision.
-R2: We did standartization ,Because we are getting 18 features from 3 different feature extraction methods, as our goal was to compare features so that no caracteristic is being lost
-
+R2: We computed the k-dist graph, from the distances of the KNNeighbour method (K=5 in our case), as proposed by authors of dbscan article, obtained value by observing when noise and cluster separation happen.
 
 Q3: Explain how you found the neighborhood radius value (epsilon) for the DBSCAN algorithm by following the procedure described in the article "A density-based algorithm for discovering clusters in large spatial databases with noise".
 R3: We computed the k-dist graph, from the distances of the KNNeighbour method (K=5 in our case), as proposed by authors of dbscan article, obtained value when noise and cluster separation happen.
